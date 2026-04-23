@@ -6,7 +6,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 # ==================== КОНФИГУРАЦИЯ ====================
 TOKEN = '8609924490:AAGBFzUjXkNOWYd2GhKXmD1Dlv8S4l9A5qs'  # Замените на новый токен!
-WEB_APP_URL = "https://episode-unquote-oversleep.ngrok-free.dev"
+WEB_APP_URL = "https://web-production-cb008.up.railway.app/"
 
 bot = telebot.TeleBot(TOKEN)
 bot.delete_webhook()
