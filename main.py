@@ -62,7 +62,7 @@ def save_users_to_github(users):
             # Создаём новый файл
             repo.create_file(REPO_PATH, "Создание файла данных бота", content)
         
-        print("✅ Данные сохранены в GitHub")
+        print("✅ Данные сохранены для вашего удобства")
         return True
     except Exception as e:
         print(f"❌ Ошибка сохранения в GitHub: {e}")
