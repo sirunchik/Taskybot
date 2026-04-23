@@ -3,21 +3,102 @@ import json
 import os
 from datetime import datetime
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from github import Github
 
 # ==================== КОНФИГУРАЦИЯ ====================
 TOKEN = os.environ.get('BOT_TOKEN', '8609924490:AAGBFzUjXkNOWYd2GhKXmD1Dlv8S4l9A5qs')
-WEB_APP_URL = os.environ.get('WEB_APP_URL', 'https://episode-unquote-oversleep.ngrok-free.dev')
+WEB_APP_URL = os.environ.get('WEB_APP_URL', 'https://your-app.up.railway.app')
+
+# GitHub настройки
+GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
+GITHUB_REPO = os.environ.get('GITHUB_REPO', 'sirunchik/Taskybot')
+REPO_PATH = 'data/users.json'  # Путь к файлу в репозитории
 
 bot = telebot.TeleBot(TOKEN)
 bot.delete_webhook()
 
-# Создаем папки
+# Создаем локальные папки
 os.makedirs('data', exist_ok=True)
 os.makedirs('languages', exist_ok=True)
 os.makedirs('web_app', exist_ok=True)
 
-# ==================== РАБОТА С ДАННЫМИ ====================
+# ==================== РАБОТА С GITHUB ====================
+def load_users_from_github():
+    """Загружает users.json из GitHub репозитория"""
+    try:
+        g = Github(GITHUB_TOKEN)
+        repo = g.get_repo(GITHUB_REPO)
+        
+        # Пытаемся получить файл
+        try:
+            contents = repo.get_contents(REPO_PATH)
+            import base64
+            content = base64.b64decode(contents.content).decode('utf-8')
+            return json.loads(content)
+        except:
+            # Файла нет — создаём пустой
+            print("Файл users.json не найден в репозитории, создаю новый")
+            return {}
+    except Exception as e:
+        print(f"Ошибка загрузки из GitHub: {e}")
+        # Пробуем загрузить локально
+        return load_users_local()
+
+def save_users_to_github(users):
+    """Сохраняет users.json в GitHub репозиторий"""
+    try:
+        g = Github(GITHUB_TOKEN)
+        repo = g.get_repo(GITHUB_REPO)
+        
+        content = json.dumps(users, ensure_ascii=False, indent=2)
+        import base64
+        encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+        
+        # Пытаемся обновить существующий файл
+        try:
+            contents = repo.get_contents(REPO_PATH)
+            repo.update_file(contents.path, "Обновление данных бота", content, contents.sha)
+        except:
+            # Создаём новый файл
+            repo.create_file(REPO_PATH, "Создание файла данных бота", content)
+        
+        print("✅ Данные сохранены в GitHub")
+        return True
+    except Exception as e:
+        print(f"❌ Ошибка сохранения в GitHub: {e}")
+        return False
+
+def load_users_local():
+    """Резервная загрузка из локального файла"""
+    path = 'data/users.json'
+    if os.path.exists(path):
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+                if content:
+                    return json.loads(content)
+        except:
+            pass
+    return {}
+
+def save_users_local(users):
+    """Резервное сохранение в локальный файл"""
+    path = 'data/users.json'
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(users, f, ensure_ascii=False, indent=2)
+
+# Загружаем данные (сначала из GitHub, потом локально)
+users = load_users_from_github()
+if not users:
+    users = load_users_local()
+
+def save_users(users):
+    """Сохраняет пользователей и в GitHub, и локально"""
+    save_users_local(users)
+    save_users_to_github(users)
+
 def load_data(filename, default=None):
+    """Загружает другие JSON файлы (локально)"""
     if default is None:
         default = {}
     path = f'data/{filename}'
@@ -27,30 +108,20 @@ def load_data(filename, default=None):
                 content = f.read().strip()
                 if content:
                     return json.loads(content)
-                return default
         except:
-            return default
+            pass
     return default
 
 def save_data(filename, data):
+    """Сохраняет другие JSON файлы (локально)"""
     path = f'data/{filename}'
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
-def load_lang(lang):
-    path = f'languages/{lang}.json'
-    if os.path.exists(path):
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {}
 
 # ==================== КОМАНДЫ БОТА ====================
 @bot.message_handler(commands=['start'])
 def start(message):
     user_id = str(message.chat.id)
-    
-    # Загружаем пользователей
-    users = load_data('users.json', {})
     
     if user_id not in users:
         users[user_id] = {
@@ -60,9 +131,8 @@ def start(message):
             "notes": [],
             "tasks": []
         }
-        save_data('users.json', users)
+        save_users(users)
     
-    # Клавиатура с кнопкой Mini App
     markup = InlineKeyboardMarkup(row_width=1)
     
     web_app_btn = InlineKeyboardButton(
@@ -80,13 +150,11 @@ def start(message):
     bot.send_message(
         user_id,
         f"🌟 Привет, {message.from_user.first_name}!\n\n"
-        f"Я твой личный органайзер. Вот что я умею:\n\n"
-        f"📝 **Заметки** — сохраняй важную информацию\n"
-        f"⏰ **Напоминания** — не пропускай важные события\n"
-        f"📅 **Календарь** — планируй свой день\n"
-        f"🏷️ **Категории** — организуй задачи по темам\n"
-        f"📜 **История** — смотри что сделано\n\n"
-        f"Нажми на кнопку ниже, чтобы открыть приложение!",
+        f"📱 Твой личный органайзер!\n\n"
+        f"📝 Заметки\n"
+        f"✅ Задачи\n"
+        f"📅 Календарь с напоминаниями\n\n"
+        f"Все данные сохраняются в GitHub — они не пропадут!",
         parse_mode='Markdown',
         reply_markup=markup
     )
@@ -103,17 +171,17 @@ def help_command(message):
 🔹 /profile — Мой профиль
 
 📱 *Мини-приложение*
-Нажми на кнопку "Открыть Органайзер" для удобного интерфейса!
+Нажми на кнопку "Открыть Органайзер"
 
-❓ По всем вопросам пишите сюда.
+💾 *Данные сохраняются в GitHub — безопасно и надёжно!*
     """
     bot.send_message(message.chat.id, help_text, parse_mode='Markdown')
 
 @bot.message_handler(commands=['notes'])
 def show_notes(message):
     user_id = str(message.chat.id)
-    users = load_data('users.json', {})
-    notes = users.get(user_id, {}).get('notes', [])
+    user_data = users.get(user_id, {})
+    notes = user_data.get('notes', [])
     
     if not notes:
         bot.send_message(message.chat.id, "📭 У вас пока нет заметок")
@@ -130,8 +198,8 @@ def show_notes(message):
 @bot.message_handler(commands=['tasks'])
 def show_tasks(message):
     user_id = str(message.chat.id)
-    users = load_data('users.json', {})
-    tasks = users.get(user_id, {}).get('tasks', [])
+    user_data = users.get(user_id, {})
+    tasks = user_data.get('tasks', [])
     active_tasks = [t for t in tasks if not t.get('completed', False)]
     
     if not active_tasks:
@@ -147,12 +215,12 @@ def show_tasks(message):
 @bot.message_handler(commands=['profile'])
 def profile(message):
     user_id = str(message.chat.id)
-    users = load_data('users.json', {})
     user_data = users.get(user_id, {})
     
     notes_count = len(user_data.get('notes', []))
-    tasks_count = len([t for t in user_data.get('tasks', []) if not t.get('completed')])
-    completed_count = len([t for t in user_data.get('tasks', []) if t.get('completed')])
+    tasks = user_data.get('tasks', [])
+    tasks_count = len([t for t in tasks if not t.get('completed')])
+    completed_count = len([t for t in tasks if t.get('completed')])
     
     text = f"👤 *Ваш профиль*\n\n"
     text += f"Имя: {user_data.get('name', 'Не указано')}\n"
@@ -160,12 +228,13 @@ def profile(message):
     text += f"📝 Заметок: {notes_count}\n"
     text += f"📋 Активных задач: {tasks_count}\n"
     text += f"✅ Выполнено задач: {completed_count}\n"
+    text += f"\n💾 Данные хранятся в GitHub"
     
     bot.send_message(message.chat.id, text, parse_mode='Markdown')
 
 @bot.message_handler(func=lambda m: True)
 def echo(message):
-    bot.send_message(message.chat.id, "Используйте кнопки меню или команды:\n/start, /help, /notes, /tasks, /profile")
+    bot.send_message(message.chat.id, "Используйте команды:\n/start, /help, /notes, /tasks, /profile")
 
 # ==================== ЗАПУСК ====================
 if __name__ == '__main__':
@@ -173,6 +242,7 @@ if __name__ == '__main__':
     print("🤖 Бот-органайзер запущен!")
     print("=" * 50)
     print(f"📱 Web App URL: {WEB_APP_URL}")
+    print("💾 Данные сохраняются в GitHub")
     print("\nДоступные команды:")
     print("  /start  - Запустить бота")
     print("  /help   - Помощь")
