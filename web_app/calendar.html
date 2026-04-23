@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>Календарь - Tasky</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 16px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        /* Календарь */
+        .calendar-card {
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .month-year {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .nav-btn {
+            background: var(--tg-theme-button-color, #3390ec);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            font-size: 18px;
+            cursor: pointer;
+            color: white;
+        }
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            color: gray;
+        }
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            background: var(--tg-theme-bg-color, white);
+            transition: all 0.2s;
+        }
+        .day.selected {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+        }
+        .day.has-event {
+            position: relative;
+        }
+        .day.has-event::after {
+            content: "●";
+            position: absolute;
+            font-size: 8px;
+            bottom: 2px;
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+        .day.selected.has-event::after {
+            color: white;
+        }
+        .day.empty {
+            background: transparent;
+            cursor: default;
+        }
+        /* Форма добавления события */
+        .event-form {
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .form-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            margin-bottom: 10px;
+            background: var(--tg-theme-bg-color, white);
+            color: var(--tg-theme-text-color, black);
+            font-family: inherit;
+        }
+        .datetime-row {
+            display: flex;
+            gap: 10px;
+        }
+        .datetime-row input {
+            flex: 1;
+        }
+        button {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:active {
+            opacity: 0.8;
+        }
+        /* Список событий */
+        .events-list {
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 60px;
+        }
+        .event-item {
+            background: var(--tg-theme-bg-color, white);
+            padding: 14px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .event-info {
+            flex: 1;
+        }
+        .event-title {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        .event-time {
+            font-size: 12px;
+            color: gray;
+        }
+        .event-desc {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .delete-event {
+            background: #ff3b30;
+            padding: 8px 14px;
+            border-radius: 10px;
+            width: auto;
+            font-size: 14px;
+        }
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: gray;
+        }
+        /* Вкладки */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .tab {
+            flex: 1;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--tg-theme-text-color, #000);
+        }
+        .tab.active {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="calendar">📅 Календарь</button>
+            <button class="tab" data-tab="events">📋 События</button>
+        </div>
+
+        <!-- Вкладка Календарь -->
+        <div id="calendarTab">
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <button class="nav-btn" id="prevMonth">◀</button>
+                    <span class="month-year" id="monthYear"></span>
+                    <button class="nav-btn" id="nextMonth">▶</button>
+                </div>
+                <div class="weekdays">
+                    <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+                </div>
+                <div class="days" id="days"></div>
+            </div>
+
+            <div class="event-form">
+                <div class="form-title">➕ Добавить событие на <span id="selectedDateLabel"></span></div>
+                <input type="text" id="eventTitle" placeholder="Название события">
+                <input type="text" id="eventDesc" placeholder="Описание (необязательно)">
+                <div class="datetime-row">
+                    <input type="time" id="eventTime" value="12:00">
+                </div>
+                <button id="addEventBtn">📌 Добавить событие</button>
+            </div>
+        </div>
+
+        <!-- Вкладка События -->
+        <div id="eventsTab" class="hidden">
+            <div class="events-list">
+                <div class="form-title">🔔 Все события</div>
+                <div id="allEventsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.MainButton.hide();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id');
+        
+        // Данные
+        let events = []; // { id, title, desc, date, time, reminderSent }
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth();
+        let selectedDate = currentDate.toISOString().split('T')[0];
+        
+        // Загрузка событий
+        async function loadEvents() {
+            const saved = localStorage.getItem(`events_${userId}`);
+            if (saved) {
+                events = JSON.parse(saved);
+            }
+            renderCalendar();
+            renderAllEvents();
+            checkReminders();
+        }
+        
+        function saveEvents() {
+            localStorage.setItem(`events_${userId}`, JSON.stringify(events));
+            // Отправляем на сервер
+            fetch(`/api/user/${userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ events })
+            }).catch(e => console.log(e));
+        }
+        
+        function addEvent() {
+            const title = document.getElementById('eventTitle').value.trim();
+            const desc = document.getElementById('eventDesc').value.trim();
+            const time = document.getElementById('eventTime').value;
+            
+            if (!title) {
+                tg.showPopup({ title: "Ошибка", message: "Введите название события", buttons: [{type: "ok"}] });
+                return;
+            }
+            
+            const newEvent = {
+                id: Date.now(),
+                title: title,
+                desc: desc,
+                date: selectedDate,
+                time: time,
+                createdAt: new Date().toISOString(),
+                reminderSent: false
+            };
+            
+            events.push(newEvent);
+            saveEvents();
+            
+            // Очищаем поля
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventDesc').value = '';
+            
+            // Обновляем отображение
+            renderCalendar();
+            renderAllEvents();
+            
+            // Показываем уведомление
+            tg.showPopup({ title: "✅ Готово", message: "Событие добавлено!", buttons: [{type: "ok"}] });
+            
+            // Проверяем напоминание
+            scheduleReminder(newEvent);
+        }
+        
+        function deleteEvent(id) {
+            tg.showPopup({
+                title: "Удалить?",
+                message: "Вы уверены?",
+                buttons: [
+                    {id: "cancel", type: "cancel"},
+                    {id: "ok", type: "ok", text: "Удалить"}
+                ]
+            }, (btnId) => {
+                if (btnId === "ok") {
+                    events = events.filter(e => e.id !== id);
+                    saveEvents();
+                    renderCalendar();
+                    renderAllEvents();
+                    tg.showPopup({ title: "🗑️", message: "Событие удалено", buttons: [{type: "ok"}] });
+                }
+            });
+        }
+        
+        // Проверка напоминаний
+        function checkReminders() {
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const currentTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            
+            events.forEach(event => {
+                if (!event.reminderSent && event.date === today && event.time <= currentTime) {
+                    event.reminderSent = true;
+                    saveEvents();
+                    
+                    tg.showPopup({
+                        title: "🔔 НАПОМИНАНИЕ!",
+                        message: `${event.title}\n${event.desc || ''}`,
+                        buttons: [{type: "ok"}]
+                    });
+                }
+            });
+        }
+        
+        function scheduleReminder(event) {
+            const eventDateTime = new Date(`${event.date}T${event.time}`);
+            const now = new Date();
+            const delay = eventDateTime - now;
+            
+            if (delay > 0 && delay < 86400000) { // Если в течение 24 часов
+                setTimeout(() => {
+                    if (!event.reminderSent) {
+                        event.reminderSent = true;
+                        saveEvents();
+                        tg.showPopup({
+                            title: "🔔 НАПОМИНАНИЕ!",
+                            message: `${event.title}\n${event.desc || ''}`,
+                            buttons: [{type: "ok"}]
+                        });
+                    }
+                }, delay);
+            }
+        }
+        
+        // Рендер календаря
+        function renderCalendar() {
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            document.getElementById('monthYear').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            document.getElementById('selectedDateLabel').textContent = formatDate(selectedDate);
+            
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const startDay = firstDay.getDay() || 7;
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            const daysContainer = document.getElementById('days');
+            daysContainer.innerHTML = '';
+            
+            // Пустые ячейки
+            for (let i = 1; i < startDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'day empty';
+                daysContainer.appendChild(empty);
+            }
+            
+            // Дни месяца
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const hasEvent = events.some(e => e.date === dateStr);
+                const isSelected = dateStr === selectedDate;
+                
+                const day = document.createElement('div');
+                day.className = `day ${isSelected ? 'selected' : ''} ${hasEvent ? 'has-event' : ''}`;
+                day.textContent = d;
+                day.onclick = () => {
+                    selectedDate = dateStr;
+                    renderCalendar();
+                    document.getElementById('selectedDateLabel').textContent = formatDate(selectedDate);
+                };
+                daysContainer.appendChild(day);
+            }
+        }
+        
+        // Все события списком
+        function renderAllEvents() {
+            const container = document.getElementById('allEventsList');
+            
+            if (events.length === 0) {
+                container.innerHTML = '<div class="empty">📭 Нет событий. Добавьте первое!</div>';
+                return;
+            }
+            
+            const sorted = [...events].sort((a,b) => a.date.localeCompare(b.date));
+            
+            container.innerHTML = sorted.map(e => `
+                <div class="event-item">
+                    <div class="event-info">
+                        <div class="event-title">${escapeHtml(e.title)}</div>
+                        <div class="event-time">📅 ${formatDate(e.date)} в ${e.time}</div>
+                        ${e.desc ? `<div class="event-desc">${escapeHtml(e.desc)}</div>` : ''}
+                    </div>
+                    <button class="delete-event" onclick="deleteEvent(${e.id})">🗑️</button>
+                </div>
+            `).join('');
+        }
+        
+        function formatDate(dateStr) {
+            const [y,m,d] = dateStr.split('-');
+            return `${d}.${m}.${y}`;
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        // Навигация по месяцам
+        document.getElementById('prevMonth').onclick = () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        };
+        
+        document.getElementById('nextMonth').onclick = () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        };
+        
+        // Переключение вкладок
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.onclick = () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const tabId = tab.dataset.tab;
+                document.getElementById('calendarTab').classList.toggle('hidden', tabId !== 'calendar');
+                document.getElementById('eventsTab').classList.toggle('hidden', tabId !== 'events');
+                
+                if (tabId === 'events') renderAllEvents();
+            };
+        });
+        
+        // Кнопка добавления
+        document.getElementById('addEventBtn').onclick = addEvent;
+        
+        // Запуск
+        loadEvents();
+        
+        // Проверка напоминаний каждую минуту
+        setInterval(checkReminders, 60000);
+        
+        console.log("Календарь с напоминаниями загружен!");
+    </script>
+</body>
+</html>

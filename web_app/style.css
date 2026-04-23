@@ -1,0 +1,255 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--tg-theme-bg-color, #ffffff);
+    color: var(--tg-theme-text-color, #000000);
+}
+
+.app {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.greeting h1 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.greeting p {
+    color: var(--tg-theme-hint-color, #999);
+    font-size: 14px;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    background: var(--tg-theme-button-color, #3390ec);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+    border-radius: 12px;
+    padding: 5px;
+}
+
+.tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: var(--tg-theme-text-color, #000);
+}
+
+.tab.active {
+    background: var(--tg-theme-button-color, #3390ec);
+    color: white;
+}
+
+/* Content */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Stats */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--tg-theme-hint-color, #999);
+}
+
+/* Progress Bar */
+.progress-bar {
+    background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+    border-radius: 10px;
+    height: 10px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-fill {
+    background: var(--tg-theme-button-color, #3390ec);
+    height: 100%;
+    transition: width 0.3s;
+}
+
+/* Calendar */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-header button {
+    background: var(--tg-theme-button-color, #3390ec);
+    border: none;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: var(--tg-theme-hint-color, #999);
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+}
+
+.calendar-day.has-event {
+    background: var(--tg-theme-button-color, #3390ec);
+    color: white;
+}
+
+.calendar-day.today {
+    border: 2px solid var(--tg-theme-button-color, #3390ec);
+}
+
+/* Tasks */
+.add-task, .add-note {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.add-task input, .add-note input, .add-note textarea {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--tg-theme-secondary-bg-color, #e0e0e0);
+    border-radius: 8px;
+    background: var(--tg-theme-bg-color, white);
+    color: var(--tg-theme-text-color, black);
+}
+
+.task-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+    cursor: pointer;
+}
+
+.filter.active {
+    background: var(--tg-theme-button-color, #3390ec);
+    color: white;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.task-item.completed {
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+
+/* Notes */
+.notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.note-item {
+    background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.note-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.note-text {
+    font-size: 14px;
+    color: var(--tg-theme-hint-color, #666);
+}

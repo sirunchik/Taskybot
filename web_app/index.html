@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Tasky - Органайзер</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding-bottom: 80px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        /* Вкладки */
+        .tabs {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding: 8px 16px;
+            gap: 8px;
+            z-index: 100;
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--tg-theme-text-color, #000);
+            opacity: 0.6;
+        }
+        .tab-btn.active {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+            opacity: 1;
+        }
+        /* Страницы */
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        /* Карточки */
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        /* Формы */
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            background: var(--tg-theme-bg-color, white);
+            color: var(--tg-theme-text-color, black);
+            font-family: inherit;
+        }
+        button {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 500;
+        }
+        button:active {
+            opacity: 0.8;
+        }
+        /* Элементы списков */
+        .item {
+            background: var(--tg-theme-bg-color, white);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item.completed {
+            opacity: 0.6;
+        }
+        .item.completed .task-text {
+            text-decoration: line-through;
+        }
+        .delete-btn {
+            background: #ff3b30;
+            padding: 6px 12px;
+            width: auto;
+            margin: 0;
+        }
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        .task-text {
+            flex: 1;
+        }
+        .flex {
+            display: flex;
+            align-items: center;
+        }
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: gray;
+        }
+        /* Статистика */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: var(--tg-theme-bg-color, white);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: gray;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Tasky Органайзер</h1>
+
+        <!-- Страница 1: Профиль -->
+        <div id="profilePage" class="page active">
+            <div class="stats-grid" id="statsGrid"></div>
+            <div class="card">
+                <div class="card-title">📊 Подробнее</div>
+                <p id="userInfo">Загрузка...</p>
+            </div>
+        </div>
+
+        <!-- Страница 2: Задачи -->
+        <div id="tasksPage" class="page">
+            <div class="card">
+                <div class="card-title">➕ Новая задача</div>
+                <div class="flex" style="gap: 10px;">
+                    <input type="text" id="taskInput" placeholder="Что нужно сделать?" style="margin-bottom: 0;">
+                    <button id="addTaskBtn" style="width: auto; padding: 12px 20px;">Добавить</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">📋 Мои задачи</div>
+                <div id="tasksList"></div>
+            </div>
+        </div>
+
+        <!-- Страница 3: Заметки -->
+        <div id="notesPage" class="page">
+            <div class="card">
+                <div class="card-title">✏️ Новая заметка</div>
+                <input type="text" id="noteTitle" placeholder="Заголовок">
+                <textarea id="noteText" placeholder="Текст заметки..." rows="3"></textarea>
+                <button id="addNoteBtn">Сохранить заметку</button>
+            </div>
+            <div class="card">
+                <div class="card-title">📝 Мои заметки</div>
+                <div id="notesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Нижние вкладки (без календаря) -->
+    <div class="tabs">
+        <button class="tab-btn active" data-page="profile">👤 Профиль</button>
+        <button class="tab-btn" data-page="tasks">✅ Задачи</button>
+        <button class="tab-btn" data-page="notes">📝 Заметки</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id');
+        
+        console.log("Запуск органайзера, user_id:", userId);
+        
+        // Данные
+        let tasks = [];
+        let notes = [];
+        
+        // ========== ЗАГРУЗКА / СОХРАНЕНИЕ ==========
+        async function loadData() {
+            if (!userId) {
+                loadLocal();
+                return;
+            }
+            try {
+                const res = await fetch(`/api/user/${userId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    tasks = data.tasks || [];
+                    notes = data.notes || [];
+                } else {
+                    loadLocal();
+                }
+            } catch(e) {
+                console.error("Ошибка загрузки:", e);
+                loadLocal();
+            }
+            updateAll();
+        }
+        
+        function loadLocal() {
+            tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+            notes = JSON.parse(localStorage.getItem('notes') || '[]');
+        }
+        
+        function saveLocal() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+        
+        async function saveToServer() {
+            saveLocal();
+            if (!userId) return;
+            try {
+                await fetch(`/api/user/${userId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tasks, notes })
+                });
+            } catch(e) {}
+        }
+        
+        // ========== ПРОФИЛЬ ==========
+        function updateProfile() {
+            const completed = tasks.filter(t => t.completed).length;
+            const active = tasks.length - completed;
+            
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${tasks.length}</div>
+                    <div class="stat-label">Всего задач</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${completed}</div>
+                    <div class="stat-label">Выполнено</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${active}</div>
+                    <div class="stat-label">Активных</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${notes.length}</div>
+                    <div class="stat-label">Заметок</div>
+                </div>
+            `;
+            
+            document.getElementById('userInfo').innerHTML = `
+                <strong>👤 Пользователь:</strong> ${userId || 'Гость'}<br>
+                <strong>📅 Дата регистрации:</strong> ${new Date().toLocaleDateString()}<br>
+                <strong>✅ Прогресс:</strong> ${tasks.length ? Math.round(completed/tasks.length*100) : 0}%
+            `;
+        }
+        
+        // ========== ЗАДАЧИ ==========
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const title = input.value.trim();
+            if (!title) {
+                tg.showPopup({ title: "Ошибка", message: "Введите текст задачи", buttons: [{type: "ok"}] });
+                return;
+            }
+            
+            tasks.push({
+                id: Date.now(),
+                title: title,
+                completed: false,
+                date: new Date().toISOString()
+            });
+            input.value = '';
+            renderTasks();
+            saveToServer();
+            updateProfile();
+            tg.showPopup({ title: "✅", message: "Задача добавлена!", buttons: [{type: "ok"}] });
+        }
+        
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                renderTasks();
+                saveToServer();
+                updateProfile();
+            }
+        }
+        
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            renderTasks();
+            saveToServer();
+            updateProfile();
+        }
+        
+        function renderTasks() {
+            const container = document.getElementById('tasksList');
+            const activeTasks = tasks.filter(t => !t.completed);
+            const completedTasks = tasks.filter(t => t.completed);
+            
+            if (tasks.length === 0) {
+                container.innerHTML = '<div class="empty">📭 Нет задач. Добавьте первую!</div>';
+                return;
+            }
+            
+            let html = '';
+            if (activeTasks.length) {
+                html += '<div style="margin-bottom: 8px;"><strong>⚡ Активные:</strong></div>';
+                activeTasks.forEach(t => {
+                    html += `
+                        <div class="item">
+                            <div class="flex">
+                                <input type="checkbox" class="checkbox" onchange="toggleTask(${t.id})">
+                                <span class="task-text">${escapeHtml(t.title)}</span>
+                            </div>
+                            <button class="delete-btn" onclick="deleteTask(${t.id})">🗑️</button>
+                        </div>
+                    `;
+                });
+            }
+            if (completedTasks.length) {
+                html += '<div style="margin: 12px 0 8px;"><strong>✅ Выполненные:</strong></div>';
+                completedTasks.forEach(t => {
+                    html += `
+                        <div class="item completed">
+                            <div class="flex">
+                                <input type="checkbox" class="checkbox" checked onchange="toggleTask(${t.id})">
+                                <span class="task-text">${escapeHtml(t.title)}</span>
+                            </div>
+                            <button class="delete-btn" onclick="deleteTask(${t.id})">🗑️</button>
+                        </div>
+                    `;
+                });
+            }
+            container.innerHTML = html;
+        }
+        
+        // ========== ЗАМЕТКИ ==========
+        function addNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            const text = document.getElementById('noteText').value.trim();
+            if (!title) {
+                tg.showPopup({ title: "Ошибка", message: "Введите заголовок заметки", buttons: [{type: "ok"}] });
+                return;
+            }
+            
+            notes.push({
+                id: Date.now(),
+                title: title,
+                text: text,
+                date: new Date().toISOString()
+            });
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteText').value = '';
+            renderNotes();
+            saveToServer();
+            updateProfile();
+            tg.showPopup({ title: "✅", message: "Заметка сохранена!", buttons: [{type: "ok"}] });
+        }
+        
+        function deleteNote(id) {
+            notes = notes.filter(n => n.id !== id);
+            renderNotes();
+            saveToServer();
+            updateProfile();
+        }
+        
+        function renderNotes() {
+            const container = document.getElementById('notesList');
+            if (notes.length === 0) {
+                container.innerHTML = '<div class="empty">📭 Нет заметок</div>';
+                return;
+            }
+            
+            container.innerHTML = notes.map(n => `
+                <div class="item" style="flex-direction: column; align-items: flex-start;">
+                    <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
+                        <strong>${escapeHtml(n.title)}</strong>
+                        <button class="delete-btn" onclick="deleteNote(${n.id})">🗑️</button>
+                    </div>
+                    ${n.text ? `<p style="font-size: 14px; color: #666; margin-top: 5px;">${escapeHtml(n.text)}</p>` : ''}
+                    <small style="color: #999; margin-top: 5px;">📅 ${new Date(n.date).toLocaleDateString()}</small>
+                </div>
+            `).join('');
+        }
+        
+        // ========== ОБЩЕЕ ==========
+        function updateAll() {
+            updateProfile();
+            renderTasks();
+            renderNotes();
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        // ========== ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ ==========
+        function switchPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`${pageName}Page`).classList.add('active');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.tab-btn[data-page="${pageName}"]`).classList.add('active');
+        }
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.onclick = () => switchPage(btn.dataset.page);
+        });
+        
+        // ========== КНОПКИ ==========
+        document.getElementById('addTaskBtn').onclick = addTask;
+        document.getElementById('addNoteBtn').onclick = addNote;
+        document.getElementById('taskInput').onkeypress = (e) => { if (e.key === 'Enter') addTask(); };
+        
+        // ========== ЗАПУСК ==========
+        loadData();
+        console.log("Органайзер готов! 3 вкладки: Профиль, Задачи, Заметки.");
+    </script>
+</body>
+</html>
