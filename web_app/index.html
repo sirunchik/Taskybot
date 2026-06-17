@@ -6,7 +6,7 @@
     <title>Tasky</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
     <style>
-        /* ===== RESET & BASE ===== */
+        /* ===== RESET ===== */
         * {
             margin: 0;
             padding: 0;
@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f2f4f8;
+            background: #f5f7fa;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -27,38 +27,81 @@
             max-width: 400px;
             width: 100%;
             background: #ffffff;
-            border-radius: 32px;
+            border-radius: 28px;
             padding: 24px 20px 28px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            animation: appFade 0.4s ease;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+            animation: fadeIn 0.4s ease;
         }
 
-        @keyframes appFade {
-            0% { opacity: 0; transform: scale(0.97); }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.96); }
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* ===== СТАТИСТИКА ===== */
-        .stats {
+        /* ===== ВЕРХНЯЯ СТРОКА (без аватарки) ===== */
+        .top-bar {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 28px;
-            gap: 8px;
+            align-items: center;
+            margin-bottom: 24px;
         }
 
-        .stat-item {
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0b1a33;
+            letter-spacing: -0.3px;
+        }
+
+        .app-title span {
+            color: #6c5ce7;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #8e9aaf;
+            padding: 4px 8px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: #f1f3f7;
+            transform: scale(1.05);
+        }
+
+        .logout-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* ===== СТАТИСТИКА (как на фото) ===== */
+        .stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
             flex: 1;
-            text-align: center;
-            padding: 12px 0;
             background: #f7f9fc;
-            border-radius: 16px;
+            border-radius: 18px;
+            padding: 14px 0;
+            text-align: center;
             transition: all 0.25s ease;
         }
 
-        .stat-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.08);
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.06);
         }
 
         .stat-number {
@@ -66,22 +109,22 @@
             font-weight: 700;
             color: #0b1a33;
             display: block;
-            transition: all 0.3s ease;
+            line-height: 1.2;
         }
 
         .stat-label {
             font-size: 12px;
             color: #8e9aaf;
-            margin-top: 2px;
             display: block;
+            margin-top: 4px;
         }
 
         /* ===== ВКЛАДКИ ===== */
         .tabs {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             background: #f1f3f7;
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 4px;
             margin-bottom: 20px;
         }
@@ -91,14 +134,13 @@
             padding: 10px 0;
             border: none;
             background: transparent;
-            border-radius: 11px;
+            border-radius: 13px;
             font-size: 14px;
             font-weight: 500;
             color: #8e9aaf;
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: inherit;
-            position: relative;
         }
 
         .tab-btn.active {
@@ -131,14 +173,14 @@
         /* ===== КОНТЕНТ ===== */
         .tab-content {
             display: none;
-            animation: tabFade 0.3s ease;
+            animation: slideUp 0.3s ease;
         }
 
         .tab-content.active {
             display: block;
         }
 
-        @keyframes tabFade {
+        @keyframes slideUp {
             0% { opacity: 0; transform: translateY(6px); }
             100% { opacity: 1; transform: translateY(0); }
         }
@@ -165,7 +207,7 @@
         .add-form input:focus {
             border-color: #6c5ce7;
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.08);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.06);
         }
 
         .add-form input::placeholder {
@@ -184,6 +226,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            min-width: 48px;
         }
 
         .add-btn:hover {
@@ -210,11 +253,11 @@
             border-radius: 14px;
             margin-bottom: 8px;
             transition: all 0.25s ease;
-            animation: itemSlide 0.3s ease;
+            animation: itemFade 0.3s ease;
         }
 
-        @keyframes itemSlide {
-            0% { opacity: 0; transform: translateX(-10px); }
+        @keyframes itemFade {
+            0% { opacity: 0; transform: translateX(-8px); }
             100% { opacity: 1; transform: translateX(0); }
         }
 
@@ -232,11 +275,14 @@
             flex: 1;
             font-size: 14px;
             color: #0b1a33;
+            word-break: break-word;
         }
 
         .item-actions {
             display: flex;
             gap: 4px;
+            flex-shrink: 0;
+            margin-left: 8px;
         }
 
         .item-btn {
@@ -260,7 +306,7 @@
 
         .empty {
             text-align: center;
-            color: #aab4c6;
+            color: #b8c4d6;
             font-size: 14px;
             padding: 24px 0;
         }
@@ -282,11 +328,12 @@
             cursor: pointer;
             color: #0b1a33;
             transition: all 0.2s ease;
+            font-family: inherit;
         }
 
         .calendar-header button:hover {
             background: #f1f3f7;
-            transform: scale(1.02);
+            transform: scale(1.03);
         }
 
         .calendar-header button:active {
@@ -296,6 +343,7 @@
         .calendar-month {
             font-weight: 600;
             font-size: 15px;
+            color: #0b1a33;
         }
 
         .calendar-weekdays {
@@ -398,22 +446,12 @@
             font-size: 14px;
             color: #0b1a33;
             transition: all 0.25s ease;
-            animation: itemSlide 0.3s ease;
+            animation: itemFade 0.3s ease;
         }
 
         .calendar-event:hover {
             background: #f1f3f7;
             transform: translateX(2px);
-        }
-
-        /* ===== АНИМАЦИЯ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ===== */
-        .slide-up {
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            0% { opacity: 0; transform: translateY(8px); }
-            100% { opacity: 1; transform: translateY(0); }
         }
 
         /* ===== АДАПТИВ ===== */
@@ -428,23 +466,34 @@
                 font-size: 13px;
                 padding: 8px 0;
             }
+            .app-title {
+                font-size: 17px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="app" id="app">
+    <div class="app">
+        <!-- ===== ВЕРХНЯЯ СТРОКА ===== -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <div class="app-title">Tasky<span>.</span></div>
+            </div>
+            <button class="logout-btn" id="logoutBtn" title="Выйти">🚪</button>
+        </div>
+
         <!-- ===== СТАТИСТИКА ===== -->
         <div class="stats">
-            <div class="stat-item">
+            <div class="stat-card">
                 <span class="stat-number" id="taskCount">0</span>
                 <span class="stat-label">📋 Задач</span>
             </div>
-            <div class="stat-item">
+            <div class="stat-card">
                 <span class="stat-number" id="noteCount">0</span>
                 <span class="stat-label">📝 Заметок</span>
             </div>
-            <div class="stat-item">
+            <div class="stat-card">
                 <span class="stat-number" id="weekTasks">0</span>
                 <span class="stat-label">📅 На неделю</span>
             </div>
@@ -453,33 +502,33 @@
         <!-- ===== ВКЛАДКИ ===== -->
         <div class="tabs">
             <button class="tab-btn active" data-tab="tasks">
-                📋 Задачи <span class="badge hidden" id="taskBadge">0</span>
+                📋 <span class="badge hidden" id="taskBadge">0</span>
             </button>
             <button class="tab-btn" data-tab="notes">
-                📝 Заметки <span class="badge hidden" id="noteBadge">0</span>
+                📝 <span class="badge hidden" id="noteBadge">0</span>
             </button>
-            <button class="tab-btn" data-tab="calendar">📅 Календарь</button>
+            <button class="tab-btn" data-tab="calendar">📅</button>
         </div>
 
         <!-- ===== ВКЛАДКА: ЗАДАЧИ ===== -->
         <div class="tab-content active" id="tab-tasks">
             <div class="add-form">
-                <input type="text" id="taskInput" placeholder="➕ Новая задача..." />
-                <button id="addTaskBtn" class="add-btn">➕</button>
+                <input type="text" id="taskInput" placeholder="Новая задача..." />
+                <button id="addTaskBtn" class="add-btn">+</button>
             </div>
             <ul class="items-list" id="tasksList">
-                <li class="empty">Нет задач. Добавьте первую!</li>
+                <li class="empty">Нет задач</li>
             </ul>
         </div>
 
         <!-- ===== ВКЛАДКА: ЗАМЕТКИ ===== -->
         <div class="tab-content" id="tab-notes">
             <div class="add-form">
-                <input type="text" id="noteInput" placeholder="✏️ Новая заметка..." />
-                <button id="addNoteBtn" class="add-btn">➕</button>
+                <input type="text" id="noteInput" placeholder="Новая заметка..." />
+                <button id="addNoteBtn" class="add-btn">+</button>
             </div>
             <ul class="items-list" id="notesList">
-                <li class="empty">Нет заметок. Добавьте первую!</li>
+                <li class="empty">Нет заметок</li>
             </ul>
         </div>
 
@@ -556,9 +605,10 @@
         function renderTasks(tasks) {
             const list = document.getElementById('tasksList');
             if (!tasks || tasks.length === 0) {
-                list.innerHTML = '<li class="empty">Нет задач. Добавьте первую!</li>';
+                list.innerHTML = '<li class="empty">Нет задач</li>';
                 document.getElementById('taskCount').textContent = '0';
                 document.getElementById('taskBadge').textContent = '0';
+                document.getElementById('taskBadge').classList.add('hidden');
                 return;
             }
             list.innerHTML = tasks.map((task, i) => `
@@ -580,9 +630,10 @@
         function renderNotes(notes) {
             const list = document.getElementById('notesList');
             if (!notes || notes.length === 0) {
-                list.innerHTML = '<li class="empty">Нет заметок. Добавьте первую!</li>';
+                list.innerHTML = '<li class="empty">Нет заметок</li>';
                 document.getElementById('noteCount').textContent = '0';
                 document.getElementById('noteBadge').textContent = '0';
+                document.getElementById('noteBadge').classList.add('hidden');
                 return;
             }
             list.innerHTML = notes.map((note, i) => `
@@ -773,7 +824,20 @@
         });
 
         // ============================================================
-        // 7. ЗАПУСК
+        // 7. ВЫХОД
+        // ============================================================
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                localStorage.removeItem('tasky_user_id');
+                localStorage.removeItem('tasky_user_name');
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                localStorage.setItem('tasky_user_id', userId);
+                refreshData();
+            }
+        });
+
+        // ============================================================
+        // 8. ЗАПУСК
         // ============================================================
         refreshData();
 
