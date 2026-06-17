@@ -1,258 +1,295 @@
-import telebot
-import json
 import os
-from datetime import datetime
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
-from github import Github
+import sys
+import json
+import telebot
+from telebot import types
+import schedule
+import time
+import threading
+from datetime import datetime, timedelta
+import re
 
-# ==================== КОНФИГУРАЦИЯ ====================
-TOKEN = os.environ.get('BOT_TOKEN', '8609924490:AAGBFzUjXkNOWYd2GhKXmD1Dlv8S4l9A5qs')
-WEB_APP_URL = os.environ.get('WEB_APP_URL', 'https://your-app.up.railway.app')
+# ========== ДИАГНОСТИКА ПРИ ЗАПУСКЕ ==========
+print("=" * 60)
+print("🚀 ЗАПУСК БОТА (main.py)")
 
-# GitHub настройки
-GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
-GITHUB_REPO = os.environ.get('GITHUB_REPO', 'sirunchik/Taskybot')
-REPO_PATH = 'data/users.json'  # Путь к файлу в репозитории
+# Проверяем переменные окружения
+TOKEN = os.getenv('BOT_TOKEN')
+if TOKEN:
+    print(f"✅ Токен найден! Длина: {len(TOKEN)} символов")
+else:
+    print("❌ ТОКЕН НЕ НАЙДЕН! Проверьте переменную BOT_TOKEN на Render")
+    sys.exit(1)
 
+print("=" * 60)
+sys.stdout.flush()
+
+# ========== ИНИЦИАЛИЗАЦИЯ БОТА ==========
 bot = telebot.TeleBot(TOKEN)
-bot.delete_webhook()
 
-# Создаем локальные папки
-os.makedirs('data', exist_ok=True)
-os.makedirs('languages', exist_ok=True)
-os.makedirs('web_app', exist_ok=True)
+# Путь к файлу с данными
+DATA_FILE = 'data/users.json'
 
-# ==================== РАБОТА С GITHUB ====================
-def load_users_from_github():
-    """Загружает users.json из GitHub репозитория"""
-    try:
-        g = Github(GITHUB_TOKEN)
-        repo = g.get_repo(GITHUB_REPO)
-        
-        # Пытаемся получить файл
+# ========== ФУНКЦИИ РАБОТЫ С ДАННЫМИ ==========
+def load_users():
+    """Загружает данные пользователей из JSON-файла"""
+    if os.path.exists(DATA_FILE):
         try:
-            contents = repo.get_contents(REPO_PATH)
-            import base64
-            content = base64.b64decode(contents.content).decode('utf-8')
-            return json.loads(content)
-        except:
-            # Файла нет — создаём пустой
-            print("Файл users.json не найден в репозитории, создаю новый")
-            return {}
-    except Exception as e:
-        print(f"Ошибка загрузки из GitHub: {e}")
-        # Пробуем загрузить локально
-        return load_users_local()
-
-def save_users_to_github(users):
-    """Сохраняет users.json в GitHub репозиторий"""
-    try:
-        g = Github(GITHUB_TOKEN)
-        repo = g.get_repo(GITHUB_REPO)
-        
-        content = json.dumps(users, ensure_ascii=False, indent=2)
-        import base64
-        encoded = base64.b64encode(content.encode('utf-8')).decode('utf-8')
-        
-        # Пытаемся обновить существующий файл
-        try:
-            contents = repo.get_contents(REPO_PATH)
-            repo.update_file(contents.path, "Обновление данных бота", content, contents.sha)
-        except:
-            # Создаём новый файл
-            repo.create_file(REPO_PATH, "Создание файла данных бота", content)
-        
-        print("✅ Данные сохранены для вашего удобства")
-        return True
-    except Exception as e:
-        print(f"❌ Ошибка сохранения в GitHub: {e}")
-        return False
-
-def load_users_local():
-    """Резервная загрузка из локального файла"""
-    path = 'data/users.json'
-    if os.path.exists(path):
-        try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(DATA_FILE, 'r', encoding='utf-8') as f:
                 content = f.read().strip()
                 if content:
                     return json.loads(content)
+                return {}
         except:
-            pass
+            return {}
     return {}
 
-def save_users_local(users):
-    """Резервное сохранение в локальный файл"""
-    path = 'data/users.json'
-    with open(path, 'w', encoding='utf-8') as f:
+def save_users(users):
+    """Сохраняет данные пользователей в JSON-файл"""
+    os.makedirs('data', exist_ok=True)
+    with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(users, f, ensure_ascii=False, indent=2)
 
-# Загружаем данные (сначала из GitHub, потом локально)
-users = load_users_from_github()
-if not users:
-    users = load_users_local()
-
-def save_users(users):
-    """Сохраняет пользователей и в GitHub, и локально"""
-    save_users_local(users)
-    save_users_to_github(users)
-
-def load_data(filename, default=None):
-    """Загружает другие JSON файлы (локально)"""
-    if default is None:
-        default = {}
-    path = f'data/{filename}'
-    if os.path.exists(path):
-        try:
-            with open(path, 'r', encoding='utf-8') as f:
-                content = f.read().strip()
-                if content:
-                    return json.loads(content)
-        except:
-            pass
-    return default
-
-def save_data(filename, data):
-    """Сохраняет другие JSON файлы (локально)"""
-    path = f'data/{filename}'
-    with open(path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-# ==================== КОМАНДЫ БОТА ====================
-@bot.message_handler(commands=['start'])
-def start(message):
-    user_id = str(message.chat.id)
-    
-    if user_id not in users:
-        users[user_id] = {
-            "name": message.from_user.first_name,
-            "joined": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "lang": "ru",
-            "notes": [],
-            "tasks": []
-        }
+def get_user_data(user_id):
+    """Получает данные конкретного пользователя"""
+    users = load_users()
+    user_id_str = str(user_id)
+    if user_id_str not in users:
+        users[user_id_str] = {'tasks': [], 'notes': [], 'name': ''}
         save_users(users)
-    
-    markup = InlineKeyboardMarkup(row_width=1)
-    
-    web_app_btn = InlineKeyboardButton(
-        text="🚀 Открыть Органайзер",
-        web_app=WebAppInfo(url=f"{WEB_APP_URL}/index.html?user_id={user_id}")
-    )
-    
-    calendar_btn = InlineKeyboardButton(
-        text="📅 Календарь",
-        web_app=WebAppInfo(url=f"{WEB_APP_URL}/calendar.html?user_id={user_id}")
-    )
-    
-    markup.add(web_app_btn, calendar_btn)
-    
-    bot.send_message(
-        user_id,
-        f"🌟 Привет, {message.from_user.first_name}!\n\n"
-        f"📱 Твой личный органайзер!\n\n"
-        f"📝 Заметки\n"
-        f"✅ Задачи\n"
-        f"📅 Календарь с напоминаниями\n\n"
-        f"Все данные сохраняются в GitHub — они не пропадут!",
-        parse_mode='Markdown',
-        reply_markup=markup
-    )
+    return users[user_id_str]
 
-@bot.message_handler(commands=['help'])
-def help_command(message):
-    help_text = """
-📖 *Помощь по боту*
+def save_user_data(user_id, data):
+    """Сохраняет данные конкретного пользователя"""
+    users = load_users()
+    user_id_str = str(user_id)
+    users[user_id_str] = data
+    save_users(users)
 
-🔹 /start — Запустить бота
-🔹 /help — Показать эту справку
-🔹 /notes — Мои заметки
-🔹 /tasks — Мои задачи
-🔹 /profile — Мой профиль
+# ========== КОМАНДА /start ==========
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    user_id = message.from_user.id
+    user_data = get_user_data(user_id)
+    
+    welcome_text = f"""
+👋 Привет, {message.from_user.first_name}!
 
-📱 *Мини-приложение*
-Нажми на кнопку "Открыть Органайзер"
+Я TaskyBot — твой помощник для организации задач и заметок.
 
-💾 *Данные сохраняются в GitHub — безопасно и надёжно!*
+📋 Что я умею:
+/tasks — список задач
+/addtask — добавить задачу
+/donetask — отметить задачу как выполненную
+/deletetask — удалить задачу
+
+📝 Заметки:
+/notes — список заметок
+/addnote — добавить заметку
+/deletenote — удалить заметку
+
+🌐 Веб-версия: taskybot.onrender.com
     """
-    bot.send_message(message.chat.id, help_text, parse_mode='Markdown')
+    bot.reply_to(message, welcome_text)
 
+# ========== КОМАНДА /tasks ==========
+@bot.message_handler(commands=['tasks'])
+def show_tasks(message):
+    user_id = message.from_user.id
+    user_data = get_user_data(user_id)
+    tasks = user_data.get('tasks', [])
+    
+    if not tasks:
+        bot.reply_to(message, "📭 У тебя пока нет задач!")
+        return
+    
+    text = "📋 *Твои задачи:*\n\n"
+    for i, task in enumerate(tasks, 1):
+        status = "✅" if task.get('done', False) else "⬜"
+        text += f"{i}. {status} {task.get('text', '')}\n"
+    
+    bot.reply_to(message, text, parse_mode='Markdown')
+
+# ========== КОМАНДА /addtask ==========
+@bot.message_handler(commands=['addtask'])
+def add_task(message):
+    try:
+        # Извлекаем текст задачи после команды
+        task_text = message.text.replace('/addtask', '').strip()
+        if not task_text:
+            bot.reply_to(message, "⚠️ Напиши задачу после команды.\nПример: /addtask Купить молоко")
+            return
+        
+        user_id = message.from_user.id
+        user_data = get_user_data(user_id)
+        
+        if 'tasks' not in user_data:
+            user_data['tasks'] = []
+        
+        user_data['tasks'].append({
+            'text': task_text,
+            'done': False,
+            'created': datetime.now().isoformat()
+        })
+        
+        save_user_data(user_id, user_data)
+        bot.reply_to(message, f"✅ Задача добавлена:\n{task_text}")
+        
+    except Exception as e:
+        bot.reply_to(message, f"❌ Ошибка: {e}")
+
+# ========== КОМАНДА /donetask ==========
+@bot.message_handler(commands=['donetask'])
+def done_task(message):
+    try:
+        parts = message.text.split(maxsplit=1)
+        if len(parts) < 2:
+            bot.reply_to(message, "⚠️ Укажи номер задачи.\nПример: /donetask 1")
+            return
+        
+        task_num = int(parts[1]) - 1
+        user_id = message.from_user.id
+        user_data = get_user_data(user_id)
+        tasks = user_data.get('tasks', [])
+        
+        if task_num < 0 or task_num >= len(tasks):
+            bot.reply_to(message, "❌ Задача с таким номером не найдена!")
+            return
+        
+        tasks[task_num]['done'] = True
+        save_user_data(user_id, user_data)
+        bot.reply_to(message, f"✅ Задача выполнена:\n{tasks[task_num]['text']}")
+        
+    except ValueError:
+        bot.reply_to(message, "⚠️ Введи корректный номер задачи.\nПример: /donetask 1")
+    except Exception as e:
+        bot.reply_to(message, f"❌ Ошибка: {e}")
+
+# ========== КОМАНДА /deletetask ==========
+@bot.message_handler(commands=['deletetask'])
+def delete_task(message):
+    try:
+        parts = message.text.split(maxsplit=1)
+        if len(parts) < 2:
+            bot.reply_to(message, "⚠️ Укажи номер задачи.\nПример: /deletetask 1")
+            return
+        
+        task_num = int(parts[1]) - 1
+        user_id = message.from_user.id
+        user_data = get_user_data(user_id)
+        tasks = user_data.get('tasks', [])
+        
+        if task_num < 0 or task_num >= len(tasks):
+            bot.reply_to(message, "❌ Задача с таким номером не найдена!")
+            return
+        
+        deleted = tasks.pop(task_num)
+        save_user_data(user_id, user_data)
+        bot.reply_to(message, f"🗑️ Задача удалена:\n{deleted['text']}")
+        
+    except ValueError:
+        bot.reply_to(message, "⚠️ Введи корректный номер задачи.\nПример: /deletetask 1")
+    except Exception as e:
+        bot.reply_to(message, f"❌ Ошибка: {e}")
+
+# ========== КОМАНДА /notes ==========
 @bot.message_handler(commands=['notes'])
 def show_notes(message):
-    user_id = str(message.chat.id)
-    user_data = users.get(user_id, {})
+    user_id = message.from_user.id
+    user_data = get_user_data(user_id)
     notes = user_data.get('notes', [])
     
     if not notes:
-        bot.send_message(message.chat.id, "📭 У вас пока нет заметок")
+        bot.reply_to(message, "📭 У тебя пока нет заметок!")
         return
     
-    text = "📝 *Ваши заметки:*\n\n"
-    for i, note in enumerate(notes[-5:], 1):
-        text += f"{i}. **{note.get('title', 'Без названия')}**\n"
-        text += f"   {note.get('text', '')[:100]}\n"
-        text += f"   📅 {note.get('date', '')}\n\n"
+    text = "📝 *Твои заметки:*\n\n"
+    for i, note in enumerate(notes, 1):
+        text += f"{i}. {note.get('text', '')}\n"
+        if note.get('date'):
+            text += f"   📅 {note.get('date')}\n"
     
-    bot.send_message(message.chat.id, text, parse_mode='Markdown')
+    bot.reply_to(message, text, parse_mode='Markdown')
 
-@bot.message_handler(commands=['tasks'])
-def show_tasks(message):
-    user_id = str(message.chat.id)
-    user_data = users.get(user_id, {})
-    tasks = user_data.get('tasks', [])
-    active_tasks = [t for t in tasks if not t.get('completed', False)]
-    
-    if not active_tasks:
-        bot.send_message(message.chat.id, "✅ У вас нет активных задач!")
-        return
-    
-    text = "📋 *Активные задачи:*\n\n"
-    for i, task in enumerate(active_tasks, 1):
-        text += f"{i}. {task.get('title', 'Без названия')}\n"
-    
-    bot.send_message(message.chat.id, text, parse_mode='Markdown')
-
-@bot.message_handler(commands=['profile'])
-def profile(message):
-    user_id = str(message.chat.id)
-    user_data = users.get(user_id, {})
-    
-    notes_count = len(user_data.get('notes', []))
-    tasks = user_data.get('tasks', [])
-    tasks_count = len([t for t in tasks if not t.get('completed')])
-    completed_count = len([t for t in tasks if t.get('completed')])
-    
-    text = f"👤 *Ваш профиль*\n\n"
-    text += f"Имя: {user_data.get('name', 'Не указано')}\n"
-    text += f"Дата регистрации: {user_data.get('joined', 'Неизвестно')}\n"
-    text += f"📝 Заметок: {notes_count}\n"
-    text += f"📋 Активных задач: {tasks_count}\n"
-    text += f"✅ Выполнено задач: {completed_count}\n"
-    text += f"\n💾 Данные хранятся в GitHub"
-    
-    bot.send_message(message.chat.id, text, parse_mode='Markdown')
-
-@bot.message_handler(func=lambda m: True)
-def echo(message):
-    bot.send_message(message.chat.id, "Используйте команды:\n/start, /help, /notes, /tasks, /profile")
-
-# ==================== ЗАПУСК ====================
-if __name__ == '__main__':
-    print("=" * 50)
-    print("🤖 Бот-органайзер запущен!")
-    print("=" * 50)
-    print(f"📱 Web App URL: {WEB_APP_URL}")
-    print("💾 Данные сохраняются в GitHub")
-    print("\nДоступные команды:")
-    print("  /start  - Запустить бота")
-    print("  /help   - Помощь")
-    print("  /notes  - Мои заметки")
-    print("  /tasks  - Мои задачи")
-    print("  /profile- Мой профиль")
-    print("=" * 50)
-    print("🚀 Бот готов к работе!")
-    
+# ========== КОМАНДА /addnote ==========
+@bot.message_handler(commands=['addnote'])
+def add_note(message):
     try:
-        bot.infinity_polling(timeout=10)
+        note_text = message.text.replace('/addnote', '').strip()
+        if not note_text:
+            bot.reply_to(message, "⚠️ Напиши заметку после команды.\nПример: /addnote Встреча в 15:00")
+            return
+        
+        user_id = message.from_user.id
+        user_data = get_user_data(user_id)
+        
+        if 'notes' not in user_data:
+            user_data['notes'] = []
+        
+        user_data['notes'].append({
+            'text': note_text,
+            'date': datetime.now().strftime('%d.%m.%Y %H:%M')
+        })
+        
+        save_user_data(user_id, user_data)
+        bot.reply_to(message, f"✅ Заметка добавлена:\n{note_text}")
+        
     except Exception as e:
-        print(f"Ошибка: {e}")
+        bot.reply_to(message, f"❌ Ошибка: {e}")
+
+# ========== КОМАНДА /deletenote ==========
+@bot.message_handler(commands=['deletenote'])
+def delete_note(message):
+    try:
+        parts = message.text.split(maxsplit=1)
+        if len(parts) < 2:
+            bot.reply_to(message, "⚠️ Укажи номер заметки.\nПример: /deletenote 1")
+            return
+        
+        note_num = int(parts[1]) - 1
+        user_id = message.from_user.id
+        user_data = get_user_data(user_id)
+        notes = user_data.get('notes', [])
+        
+        if note_num < 0 or note_num >= len(notes):
+            bot.reply_to(message, "❌ Заметка с таким номером не найдена!")
+            return
+        
+        deleted = notes.pop(note_num)
+        save_user_data(user_id, user_data)
+        bot.reply_to(message, f"🗑️ Заметка удалена:\n{deleted['text']}")
+        
+    except ValueError:
+        bot.reply_to(message, "⚠️ Введи корректный номер заметки.\nПример: /deletenote 1")
+    except Exception as e:
+        bot.reply_to(message, f"❌ Ошибка: {e}")
+
+# ========== ОБРАБОТЧИК ВСЕХ ОСТАЛЬНЫХ СООБЩЕНИЙ ==========
+@bot.message_handler(func=lambda message: True)
+def echo_all(message):
+    bot.reply_to(message, "🤔 Я не знаю такой команды.\nНапиши /start, чтобы увидеть список команд.")
+
+# ========== ЗАПУСК БОТА ==========
+if __name__ == '__main__':
+    print("🔄 Запускаю polling...")
+    try:
+        bot.polling(none_stop=True, interval=0, timeout=20)
+    except Exception as e:
+        print(f"❌ Ошибка в polling: {e}")
+        time.sleep(5)
+        # Перезапускаем при ошибке
+        os.execv(sys.executable, ['python'] + sys.argv)
+else:
+    # Это для запуска из web_server.py
+    print("✅ Бот импортирован и готов к работе")
+    # Запускаем polling в отдельном потоке
+    def run_bot():
+        try:
+            bot.polling(none_stop=True, interval=0, timeout=20)
+        except Exception as e:
+            print(f"❌ Ошибка в polling: {e}")
+            time.sleep(5)
+    
+    bot_thread = threading.Thread(target=run_bot, daemon=True)
+    bot_thread.start()
+    print("✅ Бот запущен в фоновом потоке")
