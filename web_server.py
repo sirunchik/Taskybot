@@ -1,101 +1,346 @@
-from flask import Flask, send_from_directory, request, jsonify
-from flask_cors import CORS
-import json
-import os
-import threading
-import time
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 Tasky Органайзер</title>
+    <!-- Подключаем шрифт и стили -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container" id="app">
+        <!-- ШАПКА -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>📱 Tasky Органайзер</h1>
+                <a href="https://taskybot-zzq3.onrender.com" target="_blank" class="web-link">🌐 Открыть в браузере</a>
+            </div>
+        </header>
 
-app = Flask(__name__, static_folder='web_app')
-CORS(app)
+        <!-- ОСНОВНОЙ КОНТЕНТ -->
+        <main>
+            <!-- Секция приветствия и профиля -->
+            <section class="profile-section" id="profileSection">
+                <div class="profile-card">
+                    <div class="profile-info">
+                        <span class="user-avatar" id="userAvatar">👤</span>
+                        <span class="user-name" id="userName">Пользователь</span>
+                    </div>
+                    <button id="logoutBtn" class="logout-btn">🚪 Выйти</button>
+                </div>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-item">
+                        <span class="stat-number" id="taskCount">0</span>
+                        <span class="stat-label">Задач</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="noteCount">0</span>
+                        <span class="stat-label">Заметок</span>
+                    </div>
+                </div>
+            </section>
 
-# Создаем папки
-os.makedirs('data', exist_ok=True)
-os.makedirs('web_app', exist_ok=True)
+            <!-- Секция с вкладками -->
+            <section class="tabs-section">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="tasks">📋 Задачи</button>
+                    <button class="tab-btn" data-tab="notes">📝 Заметки</button>
+                </div>
 
-# ========== ВАШИ СТАРЫЕ ФУНКЦИИ (НЕ ТРОГАЕМ) ==========
-@app.before_request
-def skip_ngrok_warning():
-    if request.headers.get('User-Agent') and 'ngrok' not in request.headers.get('User-Agent', ''):
-        pass
+                <!-- Вкладка: Задачи -->
+                <div class="tab-content active" id="tab-tasks">
+                    <div class="add-item-form">
+                        <input type="text" id="taskInput" placeholder="➕ Новая задача..." />
+                        <button id="addTaskBtn" class="add-btn">➕</button>
+                    </div>
+                    <ul class="items-list" id="tasksList">
+                        <!-- Список задач будет рендериться здесь -->
+                        <li class="empty-message">Загрузка...</li>
+                    </ul>
+                </div>
 
-def load_users():
-    path = 'data/users.json'
-    if os.path.exists(path):
-        try:
-            with open(path, 'r', encoding='utf-8') as f:
-                content = f.read().strip()
-                if content:
-                    return json.loads(content)
-                return {}
-        except:
-            return {}
-    return {}
+                <!-- Вкладка: Заметки -->
+                <div class="tab-content" id="tab-notes">
+                    <div class="add-item-form">
+                        <input type="text" id="noteInput" placeholder="✏️ Новая заметка..." />
+                        <button id="addNoteBtn" class="add-btn">➕</button>
+                    </div>
+                    <ul class="items-list" id="notesList">
+                        <!-- Список заметок будет рендериться здесь -->
+                        <li class="empty-message">Загрузка...</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
 
-def save_users(users):
-    with open('data/users.json', 'w', encoding='utf-8') as f:
-        json.dump(users, f, ensure_ascii=False, indent=2)
+        <!-- ФУТЕР -->
+        <footer class="app-footer">
+            <p>© 2026 TaskyBot · Твой помощник в делах</p>
+            <p class="footer-bot-link">🤖 <a href="https://t.me/ваш_бот_username" target="_blank">Telegram-бот</a></p>
+        </footer>
+    </div>
 
-# ========== ВСЕ ВАШИ МАРШРУТЫ ==========
-@app.route('/')
-def index():
-    return send_from_directory('web_app', 'index.html')
-
-@app.route('/index.html')
-def index_html():
-    return send_from_directory('web_app', 'index.html')
-
-@app.route('/calendar.html')
-def calendar_html():
-    return send_from_directory('web_app', 'calendar.html')
-
-@app.route('/style.css')
-def style_css():
-    return send_from_directory('web_app', 'style.css')
-
-@app.route('/script.js')
-def script_js():
-    return send_from_directory('web_app', 'script.js')
-
-@app.route('/api/user/<user_id>', methods=['GET'])
-def get_user_data(user_id):
-    users = load_users()
-    user_data = users.get(user_id, {})
-    return jsonify({
-        'name': user_data.get('name', ''),
-        'notes': user_data.get('notes', []),
-        'tasks': user_data.get('tasks', [])
-    })
-
-@app.route('/api/user/<user_id>', methods=['POST'])
-def save_user_data(user_id):
-    data = request.json
-    users = load_users()
-    
-    if user_id not in users:
-        users[user_id] = {}
-    
-    if 'notes' in data:
-        users[user_id]['notes'] = data['notes']
-    if 'tasks' in data:
-        users[user_id]['tasks'] = data['tasks']
-    if 'name' in data:
-        users[user_id]['name'] = data['name']
-    
-    save_users(users)
-    return jsonify({'status': 'ok'})
-
-# ========== ГЛАВНОЕ: ЗАПУСКАЕМ БОТА ==========
-print("🚀 Запускаем веб-сервер и бота...")
-
-# Импортируем main.py (это запустит код бота)
-try:
-    import main
-    print("✅ Бот успешно импортирован и запущен!")
-except Exception as e:
-    print(f"❌ Ошибка при запуске бота: {e}")
-
-# ========== ЗАПУСК ВЕБ-СЕРВЕРА ==========
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    print(f"🚀 Веб-сервер запущен на порту {port}")
-    app.run(host='0.0.0.0', port=port)
+    <!-- Подключаем скрипт -->
+    <script src="script.js"></script>
+    <script>
+        // ============================================================
+        // 1. Инициализация и авторизация пользователя
+        // ============================================================
+        
+        // Конфиг
+        const API_URL = '/api/user';
+        const SITE_URL = 'https://taskybot-zzq3.onrender.com'; // ОБНОВЛЕННАЯ ССЫЛКА
+        
+        // Получаем или создаём ID пользователя
+        let userId = localStorage.getItem('tasky_user_id');
+        if (!userId) {
+            userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+            localStorage.setItem('tasky_user_id', userId);
+        }
+        
+        // Имя пользователя (можно потом изменить)
+        let userName = localStorage.getItem('tasky_user_name') || 'Пользователь';
+        
+        // ============================================================
+        // 2. Основные функции работы с API
+        // ============================================================
+        
+        async function fetchUserData() {
+            try {
+                const response = await fetch(`${API_URL}/${userId}`);
+                if (!response.ok) throw new Error('Ошибка загрузки данных');
+                return await response.json();
+            } catch (error) {
+                console.error('Ошибка:', error);
+                return { name: userName, tasks: [], notes: [] };
+            }
+        }
+        
+        async function saveUserData(data) {
+            try {
+                const response = await fetch(`${API_URL}/${userId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error('Ошибка сохранения');
+                return await response.json();
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось сохранить данные. Проверьте соединение.');
+            }
+        }
+        
+        // ============================================================
+        // 3. Рендеринг UI
+        // ============================================================
+        
+        // Элементы DOM
+        const tasksList = document.getElementById('tasksList');
+        const notesList = document.getElementById('notesList');
+        const taskInput = document.getElementById('taskInput');
+        const noteInput = document.getElementById('noteInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const addNoteBtn = document.getElementById('addNoteBtn');
+        const taskCount = document.getElementById('taskCount');
+        const noteCount = document.getElementById('noteCount');
+        const userNameElem = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        
+        // Состояние
+        let currentData = { name: userName, tasks: [], notes: [] };
+        
+        function renderTasks(tasks) {
+            if (!tasks || tasks.length === 0) {
+                tasksList.innerHTML = '<li class="empty-message">📭 Нет задач. Добавьте первую!</li>';
+                return;
+            }
+            
+            tasksList.innerHTML = tasks.map((task, index) => `
+                <li class="list-item task-item ${task.done ? 'completed' : ''}" data-index="${index}">
+                    <span class="task-text">${escapeHtml(task.text)}</span>
+                    <div class="item-actions">
+                        ${!task.done ? `<button class="action-btn done-btn" data-index="${index}">✅</button>` : ''}
+                        <button class="action-btn delete-btn" data-index="${index}">🗑️</button>
+                    </div>
+                </li>
+            `).join('');
+            
+            // Обновляем счетчик
+            taskCount.textContent = tasks.length;
+        }
+        
+        function renderNotes(notes) {
+            if (!notes || notes.length === 0) {
+                notesList.innerHTML = '<li class="empty-message">📭 Нет заметок. Добавьте первую!</li>';
+                return;
+            }
+            
+            notesList.innerHTML = notes.map((note, index) => `
+                <li class="list-item note-item" data-index="${index}">
+                    <span class="note-text">${escapeHtml(note.text)}</span>
+                    ${note.date ? `<span class="note-date">📅 ${escapeHtml(note.date)}</span>` : ''}
+                    <button class="action-btn delete-btn" data-index="${index}">🗑️</button>
+                </li>
+            `).join('');
+            
+            // Обновляем счетчик
+            noteCount.textContent = notes.length;
+        }
+        
+        // Вспомогательная функция для защиты от XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // ============================================================
+        // 4. Обновление данных и UI
+        // ============================================================
+        
+        async function refreshData() {
+            const data = await fetchUserData();
+            currentData = data;
+            
+            // Обновляем имя
+            if (data.name) {
+                userName = data.name;
+                userNameElem.textContent = userName;
+                localStorage.setItem('tasky_user_name', userName);
+            }
+            
+            // Обновляем задачи и заметки
+            renderTasks(data.tasks || []);
+            renderNotes(data.notes || []);
+        }
+        
+        // ============================================================
+        // 5. Обработчики событий (добавление, удаление, выполнение)
+        // ============================================================
+        
+        // --- Добавление задачи ---
+        addTaskBtn.addEventListener('click', async () => {
+            const text = taskInput.value.trim();
+            if (!text) return;
+            
+            const newTask = { text, done: false };
+            const tasks = [...(currentData.tasks || []), newTask];
+            await saveUserData({ ...currentData, tasks });
+            taskInput.value = '';
+            await refreshData();
+        });
+        
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTaskBtn.click();
+        });
+        
+        // --- Добавление заметки ---
+        addNoteBtn.addEventListener('click', async () => {
+            const text = noteInput.value.trim();
+            if (!text) return;
+            
+            const newNote = { text, date: new Date().toLocaleString() };
+            const notes = [...(currentData.notes || []), newNote];
+            await saveUserData({ ...currentData, notes });
+            noteInput.value = '';
+            await refreshData();
+        });
+        
+        noteInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addNoteBtn.click();
+        });
+        
+        // --- Удаление и выполнение (через делегирование) ---
+        tasksList.addEventListener('click', async (e) => {
+            const target = e.target.closest('button');
+            if (!target) return;
+            
+            const index = parseInt(target.dataset.index);
+            if (isNaN(index)) return;
+            
+            const tasks = [...(currentData.tasks || [])];
+            
+            if (target.classList.contains('delete-btn')) {
+                tasks.splice(index, 1);
+                await saveUserData({ ...currentData, tasks });
+                await refreshData();
+            } else if (target.classList.contains('done-btn')) {
+                tasks[index].done = true;
+                await saveUserData({ ...currentData, tasks });
+                await refreshData();
+            }
+        });
+        
+        notesList.addEventListener('click', async (e) => {
+            const target = e.target.closest('button');
+            if (!target) return;
+            
+            const index = parseInt(target.dataset.index);
+            if (isNaN(index)) return;
+            
+            if (target.classList.contains('delete-btn')) {
+                const notes = [...(currentData.notes || [])];
+                notes.splice(index, 1);
+                await saveUserData({ ...currentData, notes });
+                await refreshData();
+            }
+        });
+        
+        // ============================================================
+        // 6. Переключение вкладок
+        // ============================================================
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Убираем активный класс у всех кнопок и вкладок
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Активируем текущие
+                this.classList.add('active');
+                const tabId = this.dataset.tab;
+                document.getElementById(`tab-${tabId}`).classList.add('active');
+            });
+        });
+        
+        // ============================================================
+        // 7. Выход (сброс ID)
+        // ============================================================
+        
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Вы уверены, что хотите выйти? Данные останутся на сервере.')) {
+                localStorage.removeItem('tasky_user_id');
+                localStorage.removeItem('tasky_user_name');
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                localStorage.setItem('tasky_user_id', userId);
+                userName = 'Пользователь';
+                localStorage.setItem('tasky_user_name', userName);
+                refreshData();
+            }
+        });
+        
+        // ============================================================
+        // 8. Запуск приложения
+        // ============================================================
+        
+        // Устанавливаем имя в UI
+        userNameElem.textContent = userName;
+        userAvatar.textContent = userName.charAt(0).toUpperCase();
+        
+        // Загружаем данные
+        refreshData();
+        
+        // Обновление данных при возвращении на вкладку (для синхронизации)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                refreshData();
+            }
+        });
+        
+        console.log(`✅ Tasky Органайзер запущен. URL: ${SITE_URL}`);
+        console.log(`👤 ID пользователя: ${userId}`);
+    </script>
+</body>
+</html>
