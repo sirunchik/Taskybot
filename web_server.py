@@ -3,7 +3,6 @@ from flask_cors import CORS
 import json
 import os
 import threading
-import sys
 import time
 
 app = Flask(__name__, static_folder='web_app')
@@ -13,7 +12,7 @@ CORS(app)
 os.makedirs('data', exist_ok=True)
 os.makedirs('web_app', exist_ok=True)
 
-# Middleware для обхода предупреждения ngrok
+# ========== ВАШИ СТАРЫЕ ФУНКЦИИ (НЕ ТРОГАЕМ) ==========
 @app.before_request
 def skip_ngrok_warning():
     if request.headers.get('User-Agent') and 'ngrok' not in request.headers.get('User-Agent', ''):
@@ -36,6 +35,7 @@ def save_users(users):
     with open('data/users.json', 'w', encoding='utf-8') as f:
         json.dump(users, f, ensure_ascii=False, indent=2)
 
+# ========== ВСЕ ВАШИ МАРШРУТЫ ==========
 @app.route('/')
 def index():
     return send_from_directory('web_app', 'index.html')
@@ -84,48 +84,15 @@ def save_user_data(user_id):
     save_users(users)
     return jsonify({'status': 'ok'})
 
-# ========== ЗАПУСК БОТА В ФОНОВОМ ПОТОКЕ ==========
-def run_bot():
-    """Запускает бота из main.py в отдельном потоке с диагностикой"""
-    try:
-        print("🔍 Пытаемся импортировать main.py...")
-        import main
-        print("✅ main.py успешно импортирован")
-        
-        # Проверяем наличие токена
-        token = os.getenv('TOKEN')
-        if token:
-            print(f"✅ Токен найден (длина: {len(token)} символов)")
-        else:
-            print("❌ ТОКЕН НЕ НАЙДЕН! Бот не запустится.")
-            return
-        
-        # Запускаем бота
-        if hasattr(main, 'main'):
-            print("🚀 Запускаем функцию main() из main.py")
-            main.main()
-        else:
-            print("⚠️ Функция main() не найдена, но файл импортирован.")
-            print("ℹ️ Если в main.py код выполняется сразу, бот уже запущен.")
-            # Если код в main.py выполняется сразу, он уже запустился при импорте.
-            # Но чтобы он не завершился, держим поток живым
-            while True:
-                time.sleep(60)
-                
-    except Exception as e:
-        print(f"❌ КРИТИЧЕСКАЯ ОШИБКА при запуске бота: {e}")
-        import traceback
-        traceback.print_exc()
+# ========== ГЛАВНОЕ: ЗАПУСКАЕМ БОТА ==========
+print("🚀 Запускаем веб-сервер и бота...")
 
-# Запускаем бота в фоновом потоке
-print("🔄 Создаем поток для бота...")
-bot_thread = threading.Thread(target=run_bot, daemon=True)
-bot_thread.start()
-print("🚀 Поток бота запущен (daemon=True)")
-
-# Даем боту время на запуск
-time.sleep(2)
-print("✅ Инициализация завершена")
+# Импортируем main.py (это запустит код бота)
+try:
+    import main
+    print("✅ Бот успешно импортирован и запущен!")
+except Exception as e:
+    print(f"❌ Ошибка при запуске бота: {e}")
 
 # ========== ЗАПУСК ВЕБ-СЕРВЕРА ==========
 if __name__ == '__main__':
