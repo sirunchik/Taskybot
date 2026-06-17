@@ -13,12 +13,11 @@ import re
 print("=" * 60)
 print("🚀 ЗАПУСК БОТА (main.py)")
 
-# Проверяем переменные окружения
 TOKEN = os.getenv('BOT_TOKEN')
 if TOKEN:
     print(f"✅ Токен найден! Длина: {len(TOKEN)} символов")
 else:
-    print("❌ ТОКЕН НЕ НАЙДЕН! Проверьте переменную BOT_TOKEN на Render")
+    print("❌ ТОКЕН НЕ НАЙДЕН!")
     sys.exit(1)
 
 print("=" * 60)
@@ -30,9 +29,11 @@ bot = telebot.TeleBot(TOKEN)
 # Путь к файлу с данными
 DATA_FILE = 'data/users.json'
 
+# URL веб-приложения
+WEB_APP_URL = 'https://taskybot-zzq3.onrender.com'
+
 # ========== ФУНКЦИИ РАБОТЫ С ДАННЫМИ ==========
 def load_users():
-    """Загружает данные пользователей из JSON-файла"""
     if os.path.exists(DATA_FILE):
         try:
             with open(DATA_FILE, 'r', encoding='utf-8') as f:
@@ -45,13 +46,11 @@ def load_users():
     return {}
 
 def save_users(users):
-    """Сохраняет данные пользователей в JSON-файл"""
     os.makedirs('data', exist_ok=True)
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(users, f, ensure_ascii=False, indent=2)
 
 def get_user_data(user_id):
-    """Получает данные конкретного пользователя"""
     users = load_users()
     user_id_str = str(user_id)
     if user_id_str not in users:
@@ -60,7 +59,6 @@ def get_user_data(user_id):
     return users[user_id_str]
 
 def save_user_data(user_id, data):
-    """Сохраняет данные конкретного пользователя"""
     users = load_users()
     user_id_str = str(user_id)
     users[user_id_str] = data
@@ -72,6 +70,15 @@ def send_welcome(message):
     user_id = message.from_user.id
     user_data = get_user_data(user_id)
     
+    # Кнопка для открытия веб-приложения с передачей user_id
+    keyboard = types.InlineKeyboardMarkup()
+    web_app_url = f"{WEB_APP_URL}?user_id={user_id}"
+    web_app_button = types.InlineKeyboardButton(
+        text="🌐 Открыть веб-версию",
+        web_app=types.WebAppInfo(url=web_app_url)
+    )
+    keyboard.add(web_app_button)
+    
     welcome_text = f"""
 👋 Привет, {message.from_user.first_name}!
 
@@ -79,18 +86,18 @@ def send_welcome(message):
 
 📋 Что я умею:
 /tasks — список задач
-/addtask — добавить задачу
-/donetask — отметить задачу как выполненную
-/deletetask — удалить задачу
+/addtask [текст] — добавить задачу
+/donetask [номер] — отметить задачу как выполненную
+/deletetask [номер] — удалить задачу
 
 📝 Заметки:
 /notes — список заметок
-/addnote — добавить заметку
-/deletenote — удалить заметку
+/addnote [текст] — добавить заметку
+/deletenote [номер] — удалить заметку
 
-🌐 Веб-версия: https://taskybot-zzq3.onrender.com
+🌐 Веб-версия: {WEB_APP_URL}
     """
-    bot.reply_to(message, welcome_text)
+    bot.send_message(message.chat.id, welcome_text, reply_markup=keyboard)
 
 # ========== КОМАНДА /tasks ==========
 @bot.message_handler(commands=['tasks'])
@@ -114,7 +121,6 @@ def show_tasks(message):
 @bot.message_handler(commands=['addtask'])
 def add_task(message):
     try:
-        # Извлекаем текст задачи после команды
         task_text = message.text.replace('/addtask', '').strip()
         if not task_text:
             bot.reply_to(message, "⚠️ Напиши задачу после команды.\nПример: /addtask Купить молоко")
@@ -277,12 +283,9 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"❌ Ошибка в polling: {e}")
         time.sleep(5)
-        # Перезапускаем при ошибке
         os.execv(sys.executable, ['python'] + sys.argv)
 else:
-    # Это для запуска из web_server.py
     print("✅ Бот импортирован и готов к работе")
-    # Запускаем polling в отдельном потоке
     def run_bot():
         try:
             bot.polling(none_stop=True, interval=0, timeout=20)
