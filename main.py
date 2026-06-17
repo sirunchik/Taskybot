@@ -94,8 +94,6 @@ def send_welcome(message):
 /notes — список заметок
 /addnote [текст] — добавить заметку
 /deletenote [номер] — удалить заметку
-
-🌐 Веб-версия: {WEB_APP_URL}
     """
     bot.send_message(message.chat.id, welcome_text, reply_markup=keyboard)
 
