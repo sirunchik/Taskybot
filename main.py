@@ -88,7 +88,7 @@ def send_welcome(message):
 /addnote — добавить заметку
 /deletenote — удалить заметку
 
-🌐 Веб-версия: taskybot.onrender.com
+🌐 Веб-версия: https://taskybot-zzq3.onrender.com
     """
     bot.reply_to(message, welcome_text)
 
