@@ -2,478 +2,334 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Tasky - Органайзер</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            padding-bottom: 80px;
-        }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        /* Вкладки */
-        .tabs {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            border-top: 1px solid rgba(0,0,0,0.1);
-            padding: 8px 16px;
-            gap: 8px;
-            z-index: 100;
-        }
-        .tab-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 12px 8px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--tg-theme-text-color, #000);
-            opacity: 0.6;
-        }
-        .tab-btn.active {
-            background: var(--tg-theme-button-color, #3390ec);
-            color: white;
-            opacity: 1;
-        }
-        /* Страницы */
-        .page {
-            display: none;
-        }
-        .page.active {
-            display: block;
-        }
-        /* Карточки */
-        .card {
-            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-        .card-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
-        /* Формы */
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            margin-bottom: 10px;
-            background: var(--tg-theme-bg-color, white);
-            color: var(--tg-theme-text-color, black);
-            font-family: inherit;
-        }
-        button {
-            background: var(--tg-theme-button-color, #3390ec);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 500;
-        }
-        button:active {
-            opacity: 0.8;
-        }
-        /* Элементы списков */
-        .item {
-            background: var(--tg-theme-bg-color, white);
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .item.completed {
-            opacity: 0.6;
-        }
-        .item.completed .task-text {
-            text-decoration: line-through;
-        }
-        .delete-btn {
-            background: #ff3b30;
-            padding: 6px 12px;
-            width: auto;
-            margin: 0;
-        }
-        .checkbox {
-            width: 22px;
-            height: 22px;
-            margin-right: 12px;
-            cursor: pointer;
-        }
-        .task-text {
-            flex: 1;
-        }
-        .flex {
-            display: flex;
-            align-items: center;
-        }
-        .empty {
-            text-align: center;
-            padding: 30px;
-            color: gray;
-        }
-        /* Статистика */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .stat-card {
-            background: var(--tg-theme-bg-color, white);
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            color: var(--tg-theme-button-color, #3390ec);
-        }
-        .stat-label {
-            font-size: 12px;
-            color: gray;
-            margin-top: 5px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 Tasky Органайзер</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>📱 Tasky Органайзер</h1>
-
-        <!-- Страница 1: Профиль -->
-        <div id="profilePage" class="page active">
-            <div class="stats-grid" id="statsGrid"></div>
-            <div class="card">
-                <div class="card-title">📊 Подробнее</div>
-                <p id="userInfo">Загрузка...</p>
+    <div class="app-container" id="app">
+        <header class="app-header">
+            <div class="header-content">
+                <h1>📱 Tasky Органайзер</h1>
+                <a href="https://taskybot-zzq3.onrender.com" target="_blank" class="web-link">🌐 Открыть в браузере</a>
             </div>
-        </div>
+        </header>
 
-        <!-- Страница 2: Задачи -->
-        <div id="tasksPage" class="page">
-            <div class="card">
-                <div class="card-title">➕ Новая задача</div>
-                <div class="flex" style="gap: 10px;">
-                    <input type="text" id="taskInput" placeholder="Что нужно сделать?" style="margin-bottom: 0;">
-                    <button id="addTaskBtn" style="width: auto; padding: 12px 20px;">Добавить</button>
+        <main>
+            <section class="profile-section" id="profileSection">
+                <div class="profile-card">
+                    <div class="profile-info">
+                        <span class="user-avatar" id="userAvatar">👤</span>
+                        <span class="user-name" id="userName">Пользователь</span>
+                    </div>
+                    <button id="logoutBtn" class="logout-btn">🚪 Выйти</button>
                 </div>
-            </div>
-            <div class="card">
-                <div class="card-title">📋 Мои задачи</div>
-                <div id="tasksList"></div>
-            </div>
-        </div>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-item">
+                        <span class="stat-number" id="taskCount">0</span>
+                        <span class="stat-label">Задач</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="noteCount">0</span>
+                        <span class="stat-label">Заметок</span>
+                    </div>
+                </div>
+            </section>
 
-        <!-- Страница 3: Заметки -->
-        <div id="notesPage" class="page">
-            <div class="card">
-                <div class="card-title">✏️ Новая заметка</div>
-                <input type="text" id="noteTitle" placeholder="Заголовок">
-                <textarea id="noteText" placeholder="Текст заметки..." rows="3"></textarea>
-                <button id="addNoteBtn">Сохранить заметку</button>
-            </div>
-            <div class="card">
-                <div class="card-title">📝 Мои заметки</div>
-                <div id="notesList"></div>
-            </div>
-        </div>
+            <section class="tabs-section">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="tasks">📋 Задачи</button>
+                    <button class="tab-btn" data-tab="notes">📝 Заметки</button>
+                </div>
+
+                <div class="tab-content active" id="tab-tasks">
+                    <div class="add-item-form">
+                        <input type="text" id="taskInput" placeholder="➕ Новая задача..." />
+                        <button id="addTaskBtn" class="add-btn">➕</button>
+                    </div>
+                    <ul class="items-list" id="tasksList">
+                        <li class="empty-message">Загрузка...</li>
+                    </ul>
+                </div>
+
+                <div class="tab-content" id="tab-notes">
+                    <div class="add-item-form">
+                        <input type="text" id="noteInput" placeholder="✏️ Новая заметка..." />
+                        <button id="addNoteBtn" class="add-btn">➕</button>
+                    </div>
+                    <ul class="items-list" id="notesList">
+                        <li class="empty-message">Загрузка...</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>© 2026 TaskyBot · Твой помощник в делах</p>
+            <p class="footer-bot-link">🤖 <a href="https://t.me/ваш_бот_username" target="_blank">Telegram-бот</a></p>
+        </footer>
     </div>
 
-    <!-- Нижние вкладки (без календаря) -->
-    <div class="tabs">
-        <button class="tab-btn active" data-page="profile">👤 Профиль</button>
-        <button class="tab-btn" data-page="tasks">✅ Задачи</button>
-        <button class="tab-btn" data-page="notes">📝 Заметки</button>
-    </div>
-
+    <script src="script.js"></script>
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        // ============================================================
+        // 1. Инициализация и авторизация пользователя
+        // ============================================================
         
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = urlParams.get('user_id');
+        // Конфиг
+        const API_URL = '/api/user';
+        const SITE_URL = 'https://taskybot-zzq3.onrender.com'; // ОБНОВЛЕННАЯ ССЫЛКА
         
-        console.log("Запуск органайзера, user_id:", userId);
+        // Получаем или создаём ID пользователя
+        let userId = localStorage.getItem('tasky_user_id');
+        if (!userId) {
+            userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+            localStorage.setItem('tasky_user_id', userId);
+        }
         
-        // Данные
-        let tasks = [];
-        let notes = [];
+        // Имя пользователя (можно потом изменить)
+        let userName = localStorage.getItem('tasky_user_name') || 'Пользователь';
         
-        // ========== ЗАГРУЗКА / СОХРАНЕНИЕ ==========
-        async function loadData() {
-            if (!userId) {
-                loadLocal();
-                return;
-            }
+        // ============================================================
+        // 2. Основные функции работы с API
+        // ============================================================
+        
+        async function fetchUserData() {
             try {
-                const res = await fetch(`/api/user/${userId}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    tasks = data.tasks || [];
-                    notes = data.notes || [];
-                } else {
-                    loadLocal();
-                }
-            } catch(e) {
-                console.error("Ошибка загрузки:", e);
-                loadLocal();
+                const response = await fetch(`${API_URL}/${userId}`);
+                if (!response.ok) throw new Error('Ошибка загрузки данных');
+                return await response.json();
+            } catch (error) {
+                console.error('Ошибка:', error);
+                return { name: userName, tasks: [], notes: [] };
             }
-            updateAll();
         }
         
-        function loadLocal() {
-            tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-            notes = JSON.parse(localStorage.getItem('notes') || '[]');
-        }
-        
-        function saveLocal() {
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            localStorage.setItem('notes', JSON.stringify(notes));
-        }
-        
-        async function saveToServer() {
-            saveLocal();
-            if (!userId) return;
+        async function saveUserData(data) {
             try {
-                await fetch(`/api/user/${userId}`, {
+                const response = await fetch(`${API_URL}/${userId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tasks, notes })
+                    body: JSON.stringify(data)
                 });
-            } catch(e) {}
+                if (!response.ok) throw new Error('Ошибка сохранения');
+                return await response.json();
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось сохранить данные. Проверьте соединение.');
+            }
         }
         
-        // ========== ПРОФИЛЬ ==========
-        function updateProfile() {
-            const completed = tasks.filter(t => t.completed).length;
-            const active = tasks.length - completed;
-            
-            document.getElementById('statsGrid').innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-number">${tasks.length}</div>
-                    <div class="stat-label">Всего задач</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${completed}</div>
-                    <div class="stat-label">Выполнено</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${active}</div>
-                    <div class="stat-label">Активных</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${notes.length}</div>
-                    <div class="stat-label">Заметок</div>
-                </div>
-            `;
-            
-            document.getElementById('userInfo').innerHTML = `
-                <strong>👤 Пользователь:</strong> ${userId || 'Гость'}<br>
-                <strong>📅 Дата регистрации:</strong> ${new Date().toLocaleDateString()}<br>
-                <strong>✅ Прогресс:</strong> ${tasks.length ? Math.round(completed/tasks.length*100) : 0}%
-            `;
-        }
+        // ============================================================
+        // 3. Рендеринг UI
+        // ============================================================
         
-        // ========== ЗАДАЧИ ==========
-        function addTask() {
-            const input = document.getElementById('taskInput');
-            const title = input.value.trim();
-            if (!title) {
-                tg.showPopup({ title: "Ошибка", message: "Введите текст задачи", buttons: [{type: "ok"}] });
+        // Элементы DOM
+        const tasksList = document.getElementById('tasksList');
+        const notesList = document.getElementById('notesList');
+        const taskInput = document.getElementById('taskInput');
+        const noteInput = document.getElementById('noteInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const addNoteBtn = document.getElementById('addNoteBtn');
+        const taskCount = document.getElementById('taskCount');
+        const noteCount = document.getElementById('noteCount');
+        const userNameElem = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        
+        // Состояние
+        let currentData = { name: userName, tasks: [], notes: [] };
+        
+        function renderTasks(tasks) {
+            if (!tasks || tasks.length === 0) {
+                tasksList.innerHTML = '<li class="empty-message">📭 Нет задач. Добавьте первую!</li>';
                 return;
             }
             
-            tasks.push({
-                id: Date.now(),
-                title: title,
-                completed: false,
-                date: new Date().toISOString()
-            });
-            input.value = '';
-            renderTasks();
-            saveToServer();
-            updateProfile();
-            tg.showPopup({ title: "✅", message: "Задача добавлена!", buttons: [{type: "ok"}] });
-        }
-        
-        function toggleTask(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.completed = !task.completed;
-                renderTasks();
-                saveToServer();
-                updateProfile();
-            }
-        }
-        
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            renderTasks();
-            saveToServer();
-            updateProfile();
-        }
-        
-        function renderTasks() {
-            const container = document.getElementById('tasksList');
-            const activeTasks = tasks.filter(t => !t.completed);
-            const completedTasks = tasks.filter(t => t.completed);
-            
-            if (tasks.length === 0) {
-                container.innerHTML = '<div class="empty">📭 Нет задач. Добавьте первую!</div>';
-                return;
-            }
-            
-            let html = '';
-            if (activeTasks.length) {
-                html += '<div style="margin-bottom: 8px;"><strong>⚡ Активные:</strong></div>';
-                activeTasks.forEach(t => {
-                    html += `
-                        <div class="item">
-                            <div class="flex">
-                                <input type="checkbox" class="checkbox" onchange="toggleTask(${t.id})">
-                                <span class="task-text">${escapeHtml(t.title)}</span>
-                            </div>
-                            <button class="delete-btn" onclick="deleteTask(${t.id})">🗑️</button>
-                        </div>
-                    `;
-                });
-            }
-            if (completedTasks.length) {
-                html += '<div style="margin: 12px 0 8px;"><strong>✅ Выполненные:</strong></div>';
-                completedTasks.forEach(t => {
-                    html += `
-                        <div class="item completed">
-                            <div class="flex">
-                                <input type="checkbox" class="checkbox" checked onchange="toggleTask(${t.id})">
-                                <span class="task-text">${escapeHtml(t.title)}</span>
-                            </div>
-                            <button class="delete-btn" onclick="deleteTask(${t.id})">🗑️</button>
-                        </div>
-                    `;
-                });
-            }
-            container.innerHTML = html;
-        }
-        
-        // ========== ЗАМЕТКИ ==========
-        function addNote() {
-            const title = document.getElementById('noteTitle').value.trim();
-            const text = document.getElementById('noteText').value.trim();
-            if (!title) {
-                tg.showPopup({ title: "Ошибка", message: "Введите заголовок заметки", buttons: [{type: "ok"}] });
-                return;
-            }
-            
-            notes.push({
-                id: Date.now(),
-                title: title,
-                text: text,
-                date: new Date().toISOString()
-            });
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteText').value = '';
-            renderNotes();
-            saveToServer();
-            updateProfile();
-            tg.showPopup({ title: "✅", message: "Заметка сохранена!", buttons: [{type: "ok"}] });
-        }
-        
-        function deleteNote(id) {
-            notes = notes.filter(n => n.id !== id);
-            renderNotes();
-            saveToServer();
-            updateProfile();
-        }
-        
-        function renderNotes() {
-            const container = document.getElementById('notesList');
-            if (notes.length === 0) {
-                container.innerHTML = '<div class="empty">📭 Нет заметок</div>';
-                return;
-            }
-            
-            container.innerHTML = notes.map(n => `
-                <div class="item" style="flex-direction: column; align-items: flex-start;">
-                    <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px;">
-                        <strong>${escapeHtml(n.title)}</strong>
-                        <button class="delete-btn" onclick="deleteNote(${n.id})">🗑️</button>
+            tasksList.innerHTML = tasks.map((task, index) => `
+                <li class="list-item task-item ${task.done ? 'completed' : ''}" data-index="${index}">
+                    <span class="task-text">${escapeHtml(task.text)}</span>
+                    <div class="item-actions">
+                        ${!task.done ? `<button class="action-btn done-btn" data-index="${index}">✅</button>` : ''}
+                        <button class="action-btn delete-btn" data-index="${index}">🗑️</button>
                     </div>
-                    ${n.text ? `<p style="font-size: 14px; color: #666; margin-top: 5px;">${escapeHtml(n.text)}</p>` : ''}
-                    <small style="color: #999; margin-top: 5px;">📅 ${new Date(n.date).toLocaleDateString()}</small>
-                </div>
+                </li>
             `).join('');
-        }
-        
-        // ========== ОБЩЕЕ ==========
-        function updateAll() {
-            updateProfile();
-            renderTasks();
-            renderNotes();
-        }
-        
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-        
-        // ========== ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ ==========
-        function switchPage(pageName) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(`${pageName}Page`).classList.add('active');
             
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.tab-btn[data-page="${pageName}"]`).classList.add('active');
+            // Обновляем счетчик
+            taskCount.textContent = tasks.length;
         }
         
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.onclick = () => switchPage(btn.dataset.page);
+        function renderNotes(notes) {
+            if (!notes || notes.length === 0) {
+                notesList.innerHTML = '<li class="empty-message">📭 Нет заметок. Добавьте первую!</li>';
+                return;
+            }
+            
+            notesList.innerHTML = notes.map((note, index) => `
+                <li class="list-item note-item" data-index="${index}">
+                    <span class="note-text">${escapeHtml(note.text)}</span>
+                    ${note.date ? `<span class="note-date">📅 ${escapeHtml(note.date)}</span>` : ''}
+                    <button class="action-btn delete-btn" data-index="${index}">🗑️</button>
+                </li>
+            `).join('');
+            
+            // Обновляем счетчик
+            noteCount.textContent = notes.length;
+        }
+        
+        // Вспомогательная функция для защиты от XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // ============================================================
+        // 4. Обновление данных и UI
+        // ============================================================
+        
+        async function refreshData() {
+            const data = await fetchUserData();
+            currentData = data;
+            
+            // Обновляем имя
+            if (data.name) {
+                userName = data.name;
+                userNameElem.textContent = userName;
+                localStorage.setItem('tasky_user_name', userName);
+            }
+            
+            // Обновляем задачи и заметки
+            renderTasks(data.tasks || []);
+            renderNotes(data.notes || []);
+        }
+        
+        // ============================================================
+        // 5. Обработчики событий (добавление, удаление, выполнение)
+        // ============================================================
+        
+        // --- Добавление задачи ---
+        addTaskBtn.addEventListener('click', async () => {
+            const text = taskInput.value.trim();
+            if (!text) return;
+            
+            const newTask = { text, done: false };
+            const tasks = [...(currentData.tasks || []), newTask];
+            await saveUserData({ ...currentData, tasks });
+            taskInput.value = '';
+            await refreshData();
         });
         
-        // ========== КНОПКИ ==========
-        document.getElementById('addTaskBtn').onclick = addTask;
-        document.getElementById('addNoteBtn').onclick = addNote;
-        document.getElementById('taskInput').onkeypress = (e) => { if (e.key === 'Enter') addTask(); };
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTaskBtn.click();
+        });
         
-        // ========== ЗАПУСК ==========
-        loadData();
-        console.log("Органайзер готов! 3 вкладки: Профиль, Задачи, Заметки.");
+        // --- Добавление заметки ---
+        addNoteBtn.addEventListener('click', async () => {
+            const text = noteInput.value.trim();
+            if (!text) return;
+            
+            const newNote = { text, date: new Date().toLocaleString() };
+            const notes = [...(currentData.notes || []), newNote];
+            await saveUserData({ ...currentData, notes });
+            noteInput.value = '';
+            await refreshData();
+        });
+        
+        noteInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addNoteBtn.click();
+        });
+        
+        // --- Удаление и выполнение (через делегирование) ---
+        tasksList.addEventListener('click', async (e) => {
+            const target = e.target.closest('button');
+            if (!target) return;
+            
+            const index = parseInt(target.dataset.index);
+            if (isNaN(index)) return;
+            
+            const tasks = [...(currentData.tasks || [])];
+            
+            if (target.classList.contains('delete-btn')) {
+                tasks.splice(index, 1);
+                await saveUserData({ ...currentData, tasks });
+                await refreshData();
+            } else if (target.classList.contains('done-btn')) {
+                tasks[index].done = true;
+                await saveUserData({ ...currentData, tasks });
+                await refreshData();
+            }
+        });
+        
+        notesList.addEventListener('click', async (e) => {
+            const target = e.target.closest('button');
+            if (!target) return;
+            
+            const index = parseInt(target.dataset.index);
+            if (isNaN(index)) return;
+            
+            if (target.classList.contains('delete-btn')) {
+                const notes = [...(currentData.notes || [])];
+                notes.splice(index, 1);
+                await saveUserData({ ...currentData, notes });
+                await refreshData();
+            }
+        });
+        
+        // ============================================================
+        // 6. Переключение вкладок
+        // ============================================================
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Убираем активный класс у всех кнопок и вкладок
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Активируем текущие
+                this.classList.add('active');
+                const tabId = this.dataset.tab;
+                document.getElementById(`tab-${tabId}`).classList.add('active');
+            });
+        });
+        
+        // ============================================================
+        // 7. Выход (сброс ID)
+        // ============================================================
+        
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Вы уверены, что хотите выйти? Данные останутся на сервере.')) {
+                localStorage.removeItem('tasky_user_id');
+                localStorage.removeItem('tasky_user_name');
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                localStorage.setItem('tasky_user_id', userId);
+                userName = 'Пользователь';
+                localStorage.setItem('tasky_user_name', userName);
+                refreshData();
+            }
+        });
+        
+        // ============================================================
+        // 8. Запуск приложения
+        // ============================================================
+        
+        // Устанавливаем имя в UI
+        userNameElem.textContent = userName;
+        userAvatar.textContent = userName.charAt(0).toUpperCase();
+        
+        // Загружаем данные
+        refreshData();
+        
+        // Обновление данных при возвращении на вкладку (для синхронизации)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                refreshData();
+            }
+        });
+        
+        console.log(`✅ Tasky Органайзер запущен. URL: ${SITE_URL}`);
+        console.log(`👤 ID пользователя: ${userId}`);
     </script>
 </body>
 </html>
