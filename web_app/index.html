@@ -6,11 +6,7 @@
     <title>Tasky</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -35,7 +31,7 @@
             position: relative;
         }
 
-        /* ===== КОНТЕЙНЕР ДЛЯ СТРАНИЦ ===== */
+        /* ===== КОНТЕЙНЕР СТРАНИЦ ===== */
         .pages-container {
             display: flex;
             height: 100%;
@@ -53,26 +49,18 @@
             flex-shrink: 0;
         }
 
-        .page::-webkit-scrollbar {
-            width: 0;
-        }
+        .page::-webkit-scrollbar { width: 0; }
 
-        /* ===== СТРАНИЦА 1: ВСЕ ЗАДАЧИ/СОБЫТИЯ (справа) ===== */
-        .page-all {
-            order: 3;
-        }
+        /* СТРАНИЦА 1: ВСЕ ЗАПИСИ (слева) */
+        .page-all { order: 1; }
 
-        /* ===== СТРАНИЦА 2: ГЛАВНАЯ ===== */
-        .page-main {
-            order: 2;
-        }
+        /* СТРАНИЦА 2: ГЛАВНАЯ (центр) */
+        .page-main { order: 2; }
 
-        /* ===== СТРАНИЦА 3: СПИСОК ЗАДАЧ (слева) ===== */
-        .page-tasks {
-            order: 1;
-        }
+        /* СТРАНИЦА 3: СПИСОК ЗАДАЧ (справа) */
+        .page-tasks { order: 3; }
 
-        /* ===== НИЖНЯЯ ПАНЕЛЬ ===== */
+        /* ===== НИЖНЯЯ ПАНЕЛЬ (3 КНОПКИ) ===== */
         .bottom-nav {
             position: absolute;
             bottom: 0;
@@ -105,16 +93,8 @@
             position: relative;
         }
 
-        .nav-btn.active {
-            color: #6c5ce7;
-        }
-
-        .nav-btn .label {
-            font-size: 9px;
-            font-weight: 500;
-            color: inherit;
-        }
-
+        .nav-btn.active { color: #6c5ce7; }
+        .nav-btn .label { font-size: 9px; font-weight: 500; color: inherit; }
         .nav-btn .badge {
             position: absolute;
             top: 0;
@@ -128,24 +108,11 @@
             min-width: 18px;
             text-align: center;
         }
+        .nav-btn .badge.hidden { display: none; }
 
-        .nav-btn .badge.hidden {
-            display: none;
-        }
-
-        /* ===== ГЛАВНАЯ СТРАНИЦА ===== */
-        .greeting {
-            font-size: 22px;
-            font-weight: 700;
-            color: #0b1a33;
-            margin-bottom: 4px;
-        }
-
-        .greeting-sub {
-            font-size: 14px;
-            color: #8e9aaf;
-            margin-bottom: 24px;
-        }
+        /* ===== ГЛАВНАЯ ===== */
+        .greeting { font-size: 22px; font-weight: 700; color: #0b1a33; margin-bottom: 4px; }
+        .greeting-sub { font-size: 14px; color: #8e9aaf; margin-bottom: 24px; }
 
         .calendar-mini {
             background: #f7f9fc;
@@ -161,12 +128,7 @@
             margin-bottom: 12px;
         }
 
-        .calendar-mini-header .month {
-            font-weight: 600;
-            font-size: 15px;
-            color: #0b1a33;
-        }
-
+        .calendar-mini-header .month { font-weight: 600; font-size: 15px; color: #0b1a33; }
         .calendar-mini-header button {
             background: none;
             border: none;
@@ -177,10 +139,7 @@
             border-radius: 8px;
             transition: background 0.2s;
         }
-
-        .calendar-mini-header button:hover {
-            background: #e6eaf0;
-        }
+        .calendar-mini-header button:hover { background: #e6eaf0; }
 
         .calendar-mini-weekdays {
             display: grid;
@@ -211,66 +170,26 @@
             position: relative;
         }
 
-        .calendar-mini-day:hover {
-            background: #e6eaf0;
-        }
-
-        .calendar-mini-day.today {
-            background: #6c5ce7;
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .calendar-mini-day.has-event {
-            background: #6c5ce7;
-            color: #fff;
-        }
-
-        .calendar-mini-day.empty {
-            cursor: default;
-        }
-
-        .calendar-mini-day.empty:hover {
-            background: transparent;
-        }
-
-        .calendar-mini-day.selected {
-            border: 2px solid #6c5ce7;
-        }
+        .calendar-mini-day:hover { background: #e6eaf0; }
+        .calendar-mini-day.today { background: #6c5ce7; color: #fff; font-weight: 600; }
+        .calendar-mini-day.has-event { background: #6c5ce7; color: #fff; }
+        .calendar-mini-day.empty { cursor: default; }
+        .calendar-mini-day.empty:hover { background: transparent; }
+        .calendar-mini-day.selected { border: 2px solid #6c5ce7; }
 
         /* ===== THIS WEEK ===== */
-        .week-section {
-            margin-bottom: 24px;
-        }
-
+        .week-section { margin-bottom: 24px; }
         .week-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
         }
+        .week-title { font-size: 16px; font-weight: 600; color: #0b1a33; }
+        .week-stats { font-size: 13px; color: #8e9aaf; }
+        .week-stats span { font-weight: 600; color: #0b1a33; }
 
-        .week-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #0b1a33;
-        }
-
-        .week-stats {
-            font-size: 13px;
-            color: #8e9aaf;
-        }
-
-        .week-stats span {
-            font-weight: 600;
-            color: #0b1a33;
-        }
-
-        .week-list {
-            list-style: none;
-            padding: 0;
-        }
-
+        .week-list { list-style: none; padding: 0; }
         .week-item {
             display: flex;
             align-items: center;
@@ -282,15 +201,8 @@
             transition: all 0.2s ease;
             animation: slideUp 0.3s ease;
         }
-
-        .week-item.done {
-            opacity: 0.5;
-        }
-
-        .week-item.done .week-item-text {
-            text-decoration: line-through;
-            color: #aab4c6;
-        }
+        .week-item.done { opacity: 0.5; }
+        .week-item.done .week-item-text { text-decoration: line-through; color: #aab4c6; }
 
         .week-item-check {
             width: 20px;
@@ -306,19 +218,9 @@
             font-size: 12px;
             background: #fff;
         }
+        .week-item-check.done { background: #6c5ce7; border-color: #6c5ce7; color: #fff; }
 
-        .week-item-check.done {
-            background: #6c5ce7;
-            border-color: #6c5ce7;
-            color: #fff;
-        }
-
-        .week-item-text {
-            flex: 1;
-            font-size: 14px;
-            color: #0b1a33;
-        }
-
+        .week-item-text { flex: 1; font-size: 14px; color: #0b1a33; }
         .week-item-delete {
             background: none;
             border: none;
@@ -327,10 +229,7 @@
             font-size: 16px;
             transition: color 0.2s;
         }
-
-        .week-item-delete:hover {
-            color: #e74c3c;
-        }
+        .week-item-delete:hover { color: #e74c3c; }
 
         /* ===== ЗАМЕТКИ ===== */
         .notes-grid {
@@ -351,30 +250,10 @@
             flex-direction: column;
             justify-content: space-between;
         }
-
-        .note-card:hover {
-            background: #f1f3f7;
-            transform: translateY(-2px);
-        }
-
-        .note-card-text {
-            font-size: 13px;
-            color: #0b1a33;
-            word-break: break-word;
-            margin-bottom: 8px;
-        }
-
-        .note-card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .note-card-date {
-            font-size: 10px;
-            color: #8e9aaf;
-        }
-
+        .note-card:hover { background: #f1f3f7; transform: translateY(-2px); }
+        .note-card-text { font-size: 13px; color: #0b1a33; word-break: break-word; margin-bottom: 8px; }
+        .note-card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .note-card-date { font-size: 10px; color: #8e9aaf; }
         .note-card-delete {
             background: none;
             border: none;
@@ -383,23 +262,11 @@
             font-size: 14px;
             transition: color 0.2s;
         }
-
-        .note-card-delete:hover {
-            color: #e74c3c;
-        }
+        .note-card-delete:hover { color: #e74c3c; }
 
         /* ===== СТРАНИЦА ЗАДАЧ ===== */
-        .page-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #0b1a33;
-            margin-bottom: 20px;
-        }
-
-        .task-list {
-            list-style: none;
-            padding: 0;
-        }
+        .page-title { font-size: 20px; font-weight: 700; color: #0b1a33; margin-bottom: 20px; }
+        .task-list { list-style: none; padding: 0; }
 
         .task-item {
             display: flex;
@@ -412,15 +279,8 @@
             transition: all 0.2s ease;
             animation: slideUp 0.3s ease;
         }
-
-        .task-item.done {
-            opacity: 0.5;
-        }
-
-        .task-item.done .task-text {
-            text-decoration: line-through;
-            color: #aab4c6;
-        }
+        .task-item.done { opacity: 0.5; }
+        .task-item.done .task-text { text-decoration: line-through; color: #aab4c6; }
 
         .task-check {
             width: 22px;
@@ -436,19 +296,9 @@
             font-size: 13px;
             background: #fff;
         }
+        .task-check.done { background: #6c5ce7; border-color: #6c5ce7; color: #fff; }
 
-        .task-check.done {
-            background: #6c5ce7;
-            border-color: #6c5ce7;
-            color: #fff;
-        }
-
-        .task-text {
-            flex: 1;
-            font-size: 14px;
-            color: #0b1a33;
-        }
-
+        .task-text { flex: 1; font-size: 14px; color: #0b1a33; }
         .task-delete {
             background: none;
             border: none;
@@ -457,19 +307,9 @@
             font-size: 18px;
             transition: color 0.2s;
         }
+        .task-delete:hover { color: #e74c3c; }
 
-        .task-delete:hover {
-            color: #e74c3c;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #b8c4d6;
-            padding: 40px 0;
-            font-size: 14px;
-        }
-
-        /* ===== СТРАНИЦА ВСЕХ ЗАПИСЕЙ ===== */
+        /* ===== ВСЕ ЗАПИСИ ===== */
         .all-item {
             display: flex;
             align-items: center;
@@ -490,29 +330,11 @@
             flex-shrink: 0;
             margin-right: 10px;
         }
+        .all-item .type-badge.task { background: #e8f0fe; color: #4a7bc7; }
+        .all-item .type-badge.event { background: #fef3e8; color: #c77a4a; }
+        .all-item .type-badge.note { background: #e8fef0; color: #4ac77a; }
 
-        .all-item .type-badge.task {
-            background: #e8f0fe;
-            color: #4a7bc7;
-        }
-
-        .all-item .type-badge.event {
-            background: #fef3e8;
-            color: #c77a4a;
-        }
-
-        .all-item .type-badge.note {
-            background: #e8fef0;
-            color: #4ac77a;
-        }
-
-        .all-item .all-text {
-            flex: 1;
-            font-size: 13px;
-            color: #0b1a33;
-            word-break: break-word;
-        }
-
+        .all-item .all-text { flex: 1; font-size: 13px; color: #0b1a33; word-break: break-word; }
         .all-item .all-delete {
             background: none;
             border: none;
@@ -523,10 +345,9 @@
             flex-shrink: 0;
             margin-left: 8px;
         }
+        .all-item .all-delete:hover { color: #e74c3c; }
 
-        .all-item .all-delete:hover {
-            color: #e74c3c;
-        }
+        .empty-state { text-align: center; color: #b8c4d6; padding: 40px 0; font-size: 14px; }
 
         /* ===== ВСПЛЫВАЮЩИЕ ОКНА ===== */
         .modal-overlay {
@@ -543,10 +364,7 @@
             justify-content: center;
             animation: fadeIn 0.3s ease;
         }
-
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
 
         .modal {
             background: #ffffff;
@@ -556,25 +374,8 @@
             max-width: 420px;
             animation: slideUpModal 0.3s ease;
         }
-
-        @keyframes slideUpModal {
-            0% { transform: translateY(40px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #0b1a33;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .modal-title { font-size: 18px; font-weight: 600; color: #0b1a33; text-align: center; margin-bottom: 20px; }
+        .modal-options { display: flex; flex-direction: column; gap: 10px; }
 
         .modal-option {
             padding: 14px 18px;
@@ -592,15 +393,8 @@
             align-items: center;
             gap: 12px;
         }
-
-        .modal-option:hover {
-            background: #f1f3f7;
-            transform: translateX(4px);
-        }
-
-        .modal-option .icon {
-            font-size: 22px;
-        }
+        .modal-option:hover { background: #f1f3f7; transform: translateX(4px); }
+        .modal-option .icon { font-size: 22px; }
 
         .modal-close {
             margin-top: 16px;
@@ -614,15 +408,9 @@
             width: 100%;
             text-align: center;
         }
+        .modal-close:hover { color: #0b1a33; }
 
-        .modal-close:hover {
-            color: #0b1a33;
-        }
-
-        .input-modal .modal {
-            padding-bottom: 40px;
-        }
-
+        .input-modal .modal { padding-bottom: 40px; }
         .input-modal input {
             width: 100%;
             padding: 14px 16px;
@@ -635,18 +423,13 @@
             transition: all 0.25s ease;
             margin-bottom: 16px;
         }
-
         .input-modal input:focus {
             border-color: #6c5ce7;
             background: #fff;
             box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.06);
         }
 
-        .input-modal .modal-actions {
-            display: flex;
-            gap: 10px;
-        }
-
+        .input-modal .modal-actions { display: flex; gap: 10px; }
         .input-modal .modal-actions button {
             flex: 1;
             padding: 12px;
@@ -658,26 +441,11 @@
             font-family: inherit;
             transition: all 0.2s ease;
         }
+        .input-modal .modal-actions .btn-confirm { background: #6c5ce7; color: #fff; }
+        .input-modal .modal-actions .btn-confirm:hover { background: #5a4bd1; }
+        .input-modal .modal-actions .btn-cancel { background: #f1f3f7; color: #8e9aaf; }
+        .input-modal .modal-actions .btn-cancel:hover { background: #e6eaf0; }
 
-        .input-modal .modal-actions .btn-confirm {
-            background: #6c5ce7;
-            color: #fff;
-        }
-
-        .input-modal .modal-actions .btn-confirm:hover {
-            background: #5a4bd1;
-        }
-
-        .input-modal .modal-actions .btn-cancel {
-            background: #f1f3f7;
-            color: #8e9aaf;
-        }
-
-        .input-modal .modal-actions .btn-cancel:hover {
-            background: #e6eaf0;
-        }
-
-        /* ===== АНИМАЦИИ ===== */
         @keyframes fadeIn {
             0% { opacity: 0; }
             100% { opacity: 1; }
@@ -688,41 +456,33 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* ===== АДАПТИВ ===== */
+        @keyframes slideUpModal {
+            0% { transform: translateY(40px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
         @media (max-width: 420px) {
-            .app-wrapper {
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
-                padding: 0;
-            }
-            .page {
-                padding: 18px 14px 90px;
-            }
-            .bottom-nav {
-                padding: 0 12px 6px;
-            }
+            .app-wrapper { height: 100vh; max-height: 100vh; border-radius: 0; padding: 0; }
+            .page { padding: 18px 14px 90px; }
+            .bottom-nav { padding: 0 12px 6px; }
         }
     </style>
 </head>
 <body>
 
     <div class="app-wrapper">
-        <!-- ===== КОНТЕЙНЕР СТРАНИЦ ===== -->
         <div class="pages-container" id="pagesContainer">
 
-            <!-- СТРАНИЦА 1: ВСЕ ЗАПИСИ (справа) -->
+            <!-- СТРАНИЦА 1: ВСЕ ЗАПИСИ (слева) -->
             <div class="page page-all" id="pageAll">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <span class="page-title">📚 Все записи</span>
                     <button onclick="goToMain()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#8e9aaf;">✕</button>
                 </div>
-                <div id="allItemsList">
-                    <div class="empty-state">Нет записей</div>
-                </div>
+                <div id="allItemsList"><div class="empty-state">Нет записей</div></div>
             </div>
 
-            <!-- СТРАНИЦА 2: ГЛАВНАЯ -->
+            <!-- СТРАНИЦА 2: ГЛАВНАЯ (центр) -->
             <div class="page page-main" id="pageMain">
                 <div class="greeting" id="greeting">Доброе утро 👋</div>
                 <div class="greeting-sub" id="greetingSub">Вот что у вас сегодня</div>
@@ -756,61 +516,48 @@
                 </div>
             </div>
 
-            <!-- СТРАНИЦА 3: СПИСОК ЗАДАЧ (слева) -->
+            <!-- СТРАНИЦА 3: СПИСОК ЗАДАЧ (справа) -->
             <div class="page page-tasks" id="pageTasks">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <span class="page-title">📋 Задачи</span>
                     <button onclick="goToMain()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#8e9aaf;">✕</button>
                 </div>
-                <div id="allTasksList">
-                    <div class="empty-state">Нет задач</div>
-                </div>
+                <div id="allTasksList"><div class="empty-state">Нет задач</div></div>
             </div>
         </div>
 
-        <!-- ===== НИЖНЯЯ ПАНЕЛЬ ===== -->
+        <!-- ===== НИЖНЯЯ ПАНЕЛЬ (3 КНОПКИ) ===== -->
         <div class="bottom-nav">
             <button class="nav-btn" id="navAll" onclick="goToAll()">
                 📚
                 <span class="label">Все</span>
                 <span class="badge hidden" id="allBadge">0</span>
             </button>
-            <button class="nav-btn active" id="navMain" onclick="goToMain()">
-                🏠
-                <span class="label">Главная</span>
+            <button class="nav-btn active" id="navAdd" onclick="openAddModal()">
+                ➕
+                <span class="label">Добавить</span>
             </button>
             <button class="nav-btn" id="navTasks" onclick="goToTasks()">
                 📋
                 <span class="label">Задачи</span>
                 <span class="badge hidden" id="taskBadge">0</span>
             </button>
-            <button class="nav-btn" id="navAdd" onclick="openAddModal()">
-                ➕
-                <span class="label">Добавить</span>
-            </button>
         </div>
     </div>
 
-    <!-- ===== ВСПЛЫВАЮЩЕЕ МЕНЮ ===== -->
+    <!-- ===== ВСПЛЫВАЮЩИЕ ОКНА ===== -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <div class="modal-title">➕ Что хотите добавить?</div>
             <div class="modal-options">
-                <button class="modal-option" data-type="task">
-                    <span class="icon">📋</span> Задача
-                </button>
-                <button class="modal-option" data-type="event">
-                    <span class="icon">📅</span> Событие в календарь
-                </button>
-                <button class="modal-option" data-type="note">
-                    <span class="icon">📝</span> Заметка
-                </button>
+                <button class="modal-option" data-type="task"><span class="icon">📋</span> Задача</button>
+                <button class="modal-option" data-type="event"><span class="icon">📅</span> Событие в календарь</button>
+                <button class="modal-option" data-type="note"><span class="icon">📝</span> Заметка</button>
             </div>
             <button class="modal-close" id="modalClose">Закрыть</button>
         </div>
     </div>
 
-    <!-- ===== ВСПЛЫВАЮЩЕЕ ПОЛЕ ДЛЯ ВВОДА ===== -->
     <div class="modal-overlay input-modal" id="inputModal">
         <div class="modal">
             <div class="modal-title" id="inputModalTitle">Добавить задачу</div>
@@ -824,23 +571,34 @@
 
     <script>
         // ============================================================
-        // 1. ИНИЦИАЛИЗАЦИЯ
+        // 1. ПОЛУЧЕНИЕ USER_ID ИЗ URL (от бота)
         // ============================================================
-        const API_URL = '/api/user';
+        const urlParams = new URLSearchParams(window.location.search);
+        let userId = urlParams.get('user_id');
 
-        let userId = localStorage.getItem('tasky_user_id');
         if (!userId) {
-            userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+            userId = localStorage.getItem('tasky_user_id');
+            if (!userId) {
+                userId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                localStorage.setItem('tasky_user_id', userId);
+            }
+        } else {
             localStorage.setItem('tasky_user_id', userId);
         }
 
+        console.log('✅ Используется user_id:', userId);
+
+        // ============================================================
+        // 2. ИНИЦИАЛИЗАЦИЯ
+        // ============================================================
+        const API_URL = '/api/user';
         let currentData = { tasks: [], notes: [] };
         let currentModalType = 'task';
         let selectedDate = new Date();
-        let currentPage = 'main'; // main | tasks | all
+        let currentPage = 'main';
 
         // ============================================================
-        // 2. API
+        // 3. API
         // ============================================================
         async function fetchUserData() {
             try {
@@ -867,7 +625,7 @@
         }
 
         // ============================================================
-        // 3. НАВИГАЦИЯ
+        // 4. НАВИГАЦИЯ (исправлены свайпы)
         // ============================================================
         function goToMain() {
             currentPage = 'main';
@@ -877,45 +635,43 @@
 
         function goToTasks() {
             currentPage = 'tasks';
-            document.getElementById('pagesContainer').style.transform = 'translateX(0%)';
+            document.getElementById('pagesContainer').style.transform = 'translateX(-66.666%)';
             updateNavButtons('tasks');
             renderAllTasks();
         }
 
         function goToAll() {
             currentPage = 'all';
-            document.getElementById('pagesContainer').style.transform = 'translateX(-66.666%)';
+            document.getElementById('pagesContainer').style.transform = 'translateX(0%)';
             updateNavButtons('all');
             renderAllItems();
         }
 
         function updateNavButtons(active) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            if (active === 'main') document.getElementById('navMain').classList.add('active');
+            if (active === 'main') document.getElementById('navAdd').classList.add('active');
             else if (active === 'tasks') document.getElementById('navTasks').classList.add('active');
             else if (active === 'all') document.getElementById('navAll').classList.add('active');
         }
 
         // ============================================================
-        // 4. ПРИВЕТСТВИЕ
+        // 5. ПРИВЕТСТВИЕ
         // ============================================================
         function setGreeting() {
             const hour = new Date().getHours();
-            let greeting = '';
-            let sub = '';
-
+            let greeting = '',
+                sub = '';
             if (hour < 6) { greeting = 'Доброй ночи 🌙';
                 sub = 'Уже поздно, но вы всё ещё здесь'; } else if (hour < 12) { greeting = 'Доброе утро ☀️';
                 sub = 'Начните день с планирования!'; } else if (hour < 18) { greeting = 'Добрый день 🌤️';
                 sub = 'Продолжайте двигаться к целям'; } else { greeting = 'Добрый вечер 🌆';
                 sub = 'Время подвести итоги дня'; }
-
             document.getElementById('greeting').textContent = greeting;
             document.getElementById('greetingSub').textContent = sub;
         }
 
         // ============================================================
-        // 5. УТИЛИТЫ
+        // 6. УТИЛИТЫ
         // ============================================================
         function escapeHtml(text) {
             const div = document.createElement('div');
@@ -928,16 +684,6 @@
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const y = date.getFullYear();
             return `${d}.${m}.${y}`;
-        }
-
-        function isTaskOnDate(task, date) {
-            const match = task.text.match(/(\d{2}\.\d{2}\.\d{4})/);
-            if (match) {
-                const parts = match[1].split('.');
-                const d = new Date(parts[2], parts[1] - 1, parts[0]);
-                return d.toDateString() === date.toDateString();
-            }
-            return false;
         }
 
         function isTaskInWeek(task) {
@@ -959,7 +705,7 @@
         }
 
         // ============================================================
-        // 6. РЕНДЕРИНГ ГЛАВНОЙ
+        // 7. РЕНДЕРИНГ ГЛАВНОЙ
         // ============================================================
         function renderCalendarMini() {
             const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
@@ -990,7 +736,6 @@
             }
             document.getElementById('calMiniDays').innerHTML = html;
 
-            // Обработчик клика по дню для добавления события
             document.querySelectorAll('.calendar-mini-day:not(.empty)').forEach(el => {
                 el.addEventListener('click', function() {
                     const date = new Date(this.dataset.date);
@@ -1011,7 +756,8 @@
             document.getElementById('weekTotalCount').textContent = weekTasks.length;
 
             if (weekTasks.length === 0) {
-                list.innerHTML = '<li class="week-item empty" style="justify-content:center; color:#b8c4d6;">Нет задач на эту неделю</li>';
+                list.innerHTML =
+                    '<li class="week-item empty" style="justify-content:center; color:#b8c4d6;">Нет задач на эту неделю</li>';
                 return;
             }
 
@@ -1025,7 +771,6 @@
                 </li>
             `).join('');
 
-            // Обработчики
             list.querySelectorAll('.week-item-check').forEach(el => {
                 el.addEventListener('click', async function() {
                     const idx = parseInt(this.dataset.index);
@@ -1090,7 +835,7 @@
         }
 
         // ============================================================
-        // 7. РЕНДЕРИНГ СТРАНИЦЫ ЗАДАЧ
+        // 8. РЕНДЕРИНГ СТРАНИЦЫ ЗАДАЧ
         // ============================================================
         function renderAllTasks() {
             const container = document.getElementById('allTasksList');
@@ -1140,14 +885,13 @@
         }
 
         // ============================================================
-        // 8. РЕНДЕРИНГ СТРАНИЦЫ "ВСЕ ЗАПИСИ"
+        // 9. РЕНДЕРИНГ СТРАНИЦЫ "ВСЕ ЗАПИСИ"
         // ============================================================
         function renderAllItems() {
             const container = document.getElementById('allItemsList');
             const tasks = currentData.tasks || [];
             const notes = currentData.notes || [];
 
-            // Собираем все записи с метками
             let items = [];
 
             tasks.forEach(t => {
@@ -1211,13 +955,12 @@
         }
 
         // ============================================================
-        // 9. ВСПЛЫВАЮЩИЕ ОКНА
+        // 10. ВСПЛЫВАЮЩИЕ ОКНА
         // ============================================================
         function openAddModal() {
             if (currentPage === 'main') {
                 document.getElementById('modalOverlay').classList.add('active');
             } else {
-                // Если не на главной — переходим на главную и открываем
                 goToMain();
                 setTimeout(() => {
                     document.getElementById('modalOverlay').classList.add('active');
@@ -1233,8 +976,6 @@
             document.getElementById('inputModalField').value = '';
             document.getElementById('inputModal').classList.add('active');
             setTimeout(() => document.getElementById('inputModalField').focus(), 300);
-
-            // Сохраняем выбранную дату для события
             document.getElementById('inputModalConfirm').dataset.date = dateStr;
         }
 
@@ -1289,7 +1030,6 @@
             const tasks = currentData.tasks || [];
             const notes = currentData.notes || [];
 
-            // Проверяем, есть ли дата от календаря
             const dateFromCalendar = this.dataset.date;
 
             if (currentModalType === 'task') {
@@ -1316,7 +1056,7 @@
         });
 
         // ============================================================
-        // 10. НАВИГАЦИЯ ПО КАЛЕНДАРЮ
+        // 11. НАВИГАЦИЯ ПО КАЛЕНДАРЮ
         // ============================================================
         document.getElementById('calMiniPrev').addEventListener('click', () => {
             selectedDate.setMonth(selectedDate.getMonth() - 1);
@@ -1329,7 +1069,7 @@
         });
 
         // ============================================================
-        // 11. ОБНОВЛЕНИЕ ДАННЫХ
+        // 12. ОБНОВЛЕНИЕ ДАННЫХ
         // ============================================================
         async function refreshData() {
             const data = await fetchUserData();
@@ -1339,11 +1079,9 @@
             renderWeekTasks();
             renderNotes();
 
-            // Обновляем страницы, если они открыты
             if (currentPage === 'tasks') renderAllTasks();
             if (currentPage === 'all') renderAllItems();
 
-            // Обновляем бейджи
             const taskCount = (currentData.tasks || []).length;
             document.getElementById('taskBadge').textContent = taskCount;
             if (taskCount > 0) document.getElementById('taskBadge').classList.remove('hidden');
@@ -1356,7 +1094,7 @@
         }
 
         // ============================================================
-        // 12. ЗАПУСК
+        // 13. ЗАПУСК
         // ============================================================
         refreshData();
 
@@ -1364,7 +1102,7 @@
             if (!document.hidden) refreshData();
         });
 
-        console.log('✅ Tasky запущен');
+        console.log('✅ Tasky запущен, user_id:', userId);
     </script>
 
 </body>
