@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📱 Tasky Органайзер</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Tasky</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
     <style>
+        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -14,110 +15,73 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f5f7fa;
-            color: #1e293b;
-            padding: 16px;
-            min-height: 100vh;
-        }
-
-        .app-container {
-            max-width: 480px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 28px;
-            padding: 24px;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
-        }
-
-        /* ===== ПРОФИЛЬ ===== */
-        .profile-section {
+            background: #f2f4f8;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 28px;
-        }
-
-        .profile-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-            color: white;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 24px;
-            font-weight: 600;
-            flex-shrink: 0;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px 16px 40px;
         }
 
-        .user-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #0f172a;
+        .app {
+            max-width: 400px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 24px 20px 28px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            animation: appFade 0.4s ease;
         }
 
-        .user-email {
-            font-size: 13px;
-            color: #64748b;
-            margin-top: 2px;
-        }
-
-        .logout-btn {
-            background: none;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            color: #64748b;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .logout-btn:hover {
-            background: #f1f5f9;
+        @keyframes appFade {
+            0% { opacity: 0; transform: scale(0.97); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         /* ===== СТАТИСТИКА ===== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
+        .stats {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 28px;
+            gap: 8px;
         }
 
         .stat-item {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 14px;
+            flex: 1;
             text-align: center;
+            padding: 12px 0;
+            background: #f7f9fc;
+            border-radius: 16px;
+            transition: all 0.25s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.08);
         }
 
         .stat-number {
-            display: block;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            color: #0f172a;
+            color: #0b1a33;
+            display: block;
+            transition: all 0.3s ease;
         }
 
         .stat-label {
             font-size: 12px;
-            color: #94a3b8;
-            margin-top: 4px;
+            color: #8e9aaf;
+            margin-top: 2px;
+            display: block;
         }
 
         /* ===== ВКЛАДКИ ===== */
-        .tabs-header {
+        .tabs {
             display: flex;
-            gap: 4px;
-            background: #f1f5f9;
-            border-radius: 16px;
+            gap: 6px;
+            background: #f1f3f7;
+            border-radius: 14px;
             padding: 4px;
             margin-bottom: 20px;
         }
@@ -127,164 +91,211 @@
             padding: 10px 0;
             border: none;
             background: transparent;
-            border-radius: 12px;
+            border-radius: 11px;
             font-size: 14px;
             font-weight: 500;
-            color: #64748b;
+            color: #8e9aaf;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            position: relative;
         }
 
         .tab-btn.active {
-            background: white;
-            color: #0f172a;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            background: #ffffff;
+            color: #0b1a33;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
-        .tab-btn:hover {
-            color: #0f172a;
+        .tab-btn:active {
+            transform: scale(0.96);
         }
 
-        /* ===== КОНТЕНТ ВКЛАДОК ===== */
+        .tab-btn .badge {
+            display: inline-block;
+            background: #6c5ce7;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 8px;
+            border-radius: 12px;
+            margin-left: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn .badge.hidden {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        /* ===== КОНТЕНТ ===== */
         .tab-content {
             display: none;
-            animation: fadeIn 0.3s ease;
+            animation: tabFade 0.3s ease;
         }
 
         .tab-content.active {
             display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes tabFade {
+            0% { opacity: 0; transform: translateY(6px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         /* ===== ФОРМА ДОБАВЛЕНИЯ ===== */
-        .add-item-form {
+        .add-form {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 16px;
         }
 
-        .add-item-form input {
+        .add-form input {
             flex: 1;
-            padding: 12px 16px;
-            border: 1px solid #e2e8f0;
+            padding: 12px 14px;
+            border: 1px solid #e6eaf0;
             border-radius: 14px;
             font-size: 14px;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             outline: none;
-            transition: border 0.2s;
+            background: #fafbfc;
+            transition: all 0.25s ease;
         }
 
-        .add-item-form input:focus {
+        .add-form input:focus {
             border-color: #6c5ce7;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.08);
+        }
+
+        .add-form input::placeholder {
+            color: #b8c4d6;
         }
 
         .add-btn {
-            padding: 12px 18px;
+            padding: 10px 16px;
             background: #6c5ce7;
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 14px;
             font-size: 20px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .add-btn:hover {
             background: #5a4bd1;
+            transform: scale(1.02);
         }
 
-        /* ===== СПИСОК ЗАДАЧ ===== */
+        .add-btn:active {
+            transform: scale(0.94);
+        }
+
+        /* ===== СПИСОК ===== */
         .items-list {
             list-style: none;
             padding: 0;
         }
 
-        .list-item {
+        .item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
-            background: #f8fafc;
-            border-radius: 12px;
+            padding: 12px 14px;
+            background: #f7f9fc;
+            border-radius: 14px;
             margin-bottom: 8px;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
+            animation: itemSlide 0.3s ease;
         }
 
-        .list-item:hover {
-            background: #f1f5f9;
+        @keyframes itemSlide {
+            0% { opacity: 0; transform: translateX(-10px); }
+            100% { opacity: 1; transform: translateX(0); }
         }
 
-        .list-item.completed .task-text {
+        .item:hover {
+            background: #f1f3f7;
+            transform: translateX(2px);
+        }
+
+        .item.done .item-text {
             text-decoration: line-through;
-            color: #94a3b8;
+            color: #aab4c6;
         }
 
-        .task-text, .note-text {
+        .item-text {
             flex: 1;
             font-size: 14px;
-        }
-
-        .note-date {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-right: 12px;
+            color: #0b1a33;
         }
 
         .item-actions {
             display: flex;
-            gap: 6px;
+            gap: 4px;
         }
 
-        .action-btn {
+        .item-btn {
             background: none;
             border: none;
             font-size: 18px;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 4px 6px;
             border-radius: 8px;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
         }
 
-        .action-btn:hover {
-            background: rgba(0, 0, 0, 0.05);
+        .item-btn:hover {
+            background: rgba(0, 0, 0, 0.04);
+            transform: scale(1.1);
         }
 
-        .empty-message {
+        .item-btn:active {
+            transform: scale(0.85);
+        }
+
+        .empty {
             text-align: center;
-            color: #94a3b8;
-            padding: 24px 0;
+            color: #aab4c6;
             font-size: 14px;
+            padding: 24px 0;
         }
 
         /* ===== КАЛЕНДАРЬ ===== */
-        #calendar-header {
+        .calendar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
         }
 
-        #calendar-header button {
+        .calendar-header button {
             background: none;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e6eaf0;
             border-radius: 10px;
-            padding: 8px 14px;
+            padding: 6px 14px;
             font-size: 16px;
             cursor: pointer;
-            transition: all 0.2s;
+            color: #0b1a33;
+            transition: all 0.2s ease;
         }
 
-        #calendar-header button:hover {
-            background: #f1f5f9;
+        .calendar-header button:hover {
+            background: #f1f3f7;
+            transform: scale(1.02);
         }
 
-        #calendar-month-year {
-            font-size: 16px;
+        .calendar-header button:active {
+            transform: scale(0.92);
+        }
+
+        .calendar-month {
             font-weight: 600;
+            font-size: 15px;
         }
 
         .calendar-weekdays {
@@ -292,12 +303,12 @@
             grid-template-columns: repeat(7, 1fr);
             text-align: center;
             font-size: 12px;
-            font-weight: 600;
-            color: #94a3b8;
+            font-weight: 500;
+            color: #8e9aaf;
             margin-bottom: 8px;
         }
 
-        #calendar-days {
+        .calendar-days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 4px;
@@ -311,17 +322,24 @@
             border-radius: 12px;
             font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
             background: transparent;
+            color: #0b1a33;
+            position: relative;
         }
 
         .calendar-day:hover {
-            background: #f1f5f9;
+            background: #f1f3f7;
+            transform: scale(1.05);
+        }
+
+        .calendar-day:active {
+            transform: scale(0.92);
         }
 
         .calendar-day.today {
             background: #6c5ce7;
-            color: white;
+            color: #fff;
             font-weight: 600;
         }
 
@@ -333,108 +351,91 @@
             border: 2px solid #6c5ce7;
         }
 
-        .calendar-day.has-events::after {
+        .calendar-day.has-event::after {
             content: '';
-            display: block;
-            width: 6px;
-            height: 6px;
+            position: absolute;
+            bottom: 4px;
+            width: 5px;
+            height: 5px;
             background: #6c5ce7;
             border-radius: 50%;
-            position: absolute;
-            bottom: 2px;
         }
 
         .calendar-day.empty {
             cursor: default;
             background: transparent !important;
+            transform: none !important;
         }
 
-        .calendar-day {
-            position: relative;
+        .calendar-day.empty:hover {
+            transform: none !important;
         }
 
-        #calendar-events {
-            margin-top: 20px;
+        /* ===== СОБЫТИЯ В КАЛЕНДАРЕ ===== */
+        .calendar-events {
+            margin-top: 18px;
             padding-top: 16px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #e6eaf0;
         }
 
-        #calendar-events h3 {
-            font-size: 14px;
+        .calendar-events-title {
+            font-size: 13px;
             font-weight: 500;
-            color: #64748b;
-            margin-bottom: 12px;
+            color: #8e9aaf;
+            margin-bottom: 10px;
         }
 
-        #calendar-events-list {
+        .calendar-events-list {
             list-style: none;
             padding: 0;
         }
 
-        #calendar-events-list li {
-            padding: 8px 12px;
-            background: #f8fafc;
-            border-radius: 8px;
+        .calendar-event {
+            padding: 8px 14px;
+            background: #f7f9fc;
+            border-radius: 10px;
             margin-bottom: 6px;
             font-size: 14px;
+            color: #0b1a33;
+            transition: all 0.25s ease;
+            animation: itemSlide 0.3s ease;
         }
 
-        /* ===== ФУТЕР ===== */
-        .app-footer {
-            text-align: center;
-            margin-top: 28px;
-            padding-top: 16px;
-            border-top: 1px solid #e2e8f0;
-            font-size: 12px;
-            color: #94a3b8;
+        .calendar-event:hover {
+            background: #f1f3f7;
+            transform: translateX(2px);
         }
 
-        .app-footer a {
-            color: #6c5ce7;
-            text-decoration: none;
+        /* ===== АНИМАЦИЯ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ===== */
+        .slide-up {
+            animation: slideUp 0.3s ease;
         }
 
-        .app-footer a:hover {
-            text-decoration: underline;
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         /* ===== АДАПТИВ ===== */
-        @media (max-width: 400px) {
-            .app-container {
-                padding: 16px;
-                border-radius: 20px;
+        @media (max-width: 420px) {
+            .app {
+                padding: 18px 14px 22px;
             }
-
-            .stats-grid {
-                gap: 8px;
-            }
-
-            .stat-item {
-                padding: 10px;
-            }
-
             .stat-number {
-                font-size: 20px;
+                font-size: 18px;
+            }
+            .tab-btn {
+                font-size: 13px;
+                padding: 8px 0;
             }
         }
     </style>
 </head>
 <body>
-    <div class="app-container" id="app">
-        <!-- ПРОФИЛЬ -->
-        <section class="profile-section">
-            <div class="profile-info">
-                <div class="user-avatar" id="userAvatar">👤</div>
-                <div>
-                    <div class="user-name" id="userName">Пользователь</div>
-                    <div class="user-email" id="userEmail">@user</div>
-                </div>
-            </div>
-            <button id="logoutBtn" class="logout-btn">🚪 Выйти</button>
-        </section>
 
-        <!-- СТАТИСТИКА -->
-        <div class="stats-grid">
+    <div class="app" id="app">
+        <!-- ===== СТАТИСТИКА ===== -->
+        <div class="stats">
             <div class="stat-item">
                 <span class="stat-number" id="taskCount">0</span>
                 <span class="stat-label">📋 Задач</span>
@@ -449,58 +450,57 @@
             </div>
         </div>
 
-        <!-- ВКЛАДКИ -->
-        <div class="tabs-header">
-            <button class="tab-btn active" data-tab="tasks">📋 Задачи</button>
-            <button class="tab-btn" data-tab="notes">📝 Заметки</button>
+        <!-- ===== ВКЛАДКИ ===== -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="tasks">
+                📋 Задачи <span class="badge hidden" id="taskBadge">0</span>
+            </button>
+            <button class="tab-btn" data-tab="notes">
+                📝 Заметки <span class="badge hidden" id="noteBadge">0</span>
+            </button>
             <button class="tab-btn" data-tab="calendar">📅 Календарь</button>
         </div>
 
-        <!-- ВКЛАДКА: ЗАДАЧИ -->
+        <!-- ===== ВКЛАДКА: ЗАДАЧИ ===== -->
         <div class="tab-content active" id="tab-tasks">
-            <div class="add-item-form">
+            <div class="add-form">
                 <input type="text" id="taskInput" placeholder="➕ Новая задача..." />
                 <button id="addTaskBtn" class="add-btn">➕</button>
             </div>
             <ul class="items-list" id="tasksList">
-                <li class="empty-message">Нет задач. Добавьте первую!</li>
+                <li class="empty">Нет задач. Добавьте первую!</li>
             </ul>
         </div>
 
-        <!-- ВКЛАДКА: ЗАМЕТКИ -->
+        <!-- ===== ВКЛАДКА: ЗАМЕТКИ ===== -->
         <div class="tab-content" id="tab-notes">
-            <div class="add-item-form">
+            <div class="add-form">
                 <input type="text" id="noteInput" placeholder="✏️ Новая заметка..." />
                 <button id="addNoteBtn" class="add-btn">➕</button>
             </div>
             <ul class="items-list" id="notesList">
-                <li class="empty-message">Нет заметок. Добавьте первую!</li>
+                <li class="empty">Нет заметок. Добавьте первую!</li>
             </ul>
         </div>
 
-        <!-- ВКЛАДКА: КАЛЕНДАРЬ -->
+        <!-- ===== ВКЛАДКА: КАЛЕНДАРЬ ===== -->
         <div class="tab-content" id="tab-calendar">
-            <div id="calendar-header">
-                <button id="calendar-prev">◀</button>
-                <span id="calendar-month-year">Январь 2026</span>
-                <button id="calendar-next">▶</button>
+            <div class="calendar-header">
+                <button id="calendarPrev">◀</button>
+                <span class="calendar-month" id="calendarMonth">Январь 2026</span>
+                <button id="calendarNext">▶</button>
             </div>
             <div class="calendar-weekdays">
                 <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
             </div>
-            <div id="calendar-days"></div>
-            <div id="calendar-events">
-                <h3>📌 События на этот день</h3>
-                <ul id="calendar-events-list">
-                    <li class="empty-message">Нет событий</li>
+            <div class="calendar-days" id="calendarDays"></div>
+            <div class="calendar-events" id="calendarEvents">
+                <div class="calendar-events-title">📌 События на этот день</div>
+                <ul class="calendar-events-list" id="calendarEventsList">
+                    <li class="empty">Нет событий</li>
                 </ul>
             </div>
         </div>
-
-        <!-- ФУТЕР -->
-        <footer class="app-footer">
-            <p>© 2026 TaskyBot · <a href="https://taskybot-zzq3.onrender.com" target="_blank">Открыть в браузере</a></p>
-        </footer>
     </div>
 
     <script>
@@ -508,7 +508,6 @@
         // 1. ИНИЦИАЛИЗАЦИЯ
         // ============================================================
         const API_URL = '/api/user';
-        const SITE_URL = 'https://taskybot-zzq3.onrender.com';
 
         let userId = localStorage.getItem('tasky_user_id');
         if (!userId) {
@@ -516,32 +515,31 @@
             localStorage.setItem('tasky_user_id', userId);
         }
 
-        let userName = localStorage.getItem('tasky_user_name') || 'Пользователь';
-        let currentData = { name: userName, tasks: [], notes: [] };
+        let currentData = { tasks: [], notes: [] };
 
         // ============================================================
         // 2. API
         // ============================================================
         async function fetchUserData() {
             try {
-                const response = await fetch(`${API_URL}/${userId}`);
-                if (!response.ok) throw new Error('Ошибка загрузки');
-                return await response.json();
-            } catch (error) {
-                return { name: userName, tasks: [], notes: [] };
+                const res = await fetch(`${API_URL}/${userId}`);
+                if (!res.ok) throw new Error('Ошибка загрузки');
+                return await res.json();
+            } catch {
+                return { tasks: [], notes: [] };
             }
         }
 
         async function saveUserData(data) {
             try {
-                const response = await fetch(`${API_URL}/${userId}`, {
+                const res = await fetch(`${API_URL}/${userId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-                if (!response.ok) throw new Error('Ошибка сохранения');
-                return await response.json();
-            } catch (error) {
+                if (!res.ok) throw new Error('Ошибка сохранения');
+                return await res.json();
+            } catch {
                 alert('Не удалось сохранить данные. Проверьте соединение.');
             }
         }
@@ -558,36 +556,48 @@
         function renderTasks(tasks) {
             const list = document.getElementById('tasksList');
             if (!tasks || tasks.length === 0) {
-                list.innerHTML = '<li class="empty-message">Нет задач. Добавьте первую!</li>';
+                list.innerHTML = '<li class="empty">Нет задач. Добавьте первую!</li>';
+                document.getElementById('taskCount').textContent = '0';
+                document.getElementById('taskBadge').textContent = '0';
                 return;
             }
-            list.innerHTML = tasks.map((task, index) => `
-                <li class="list-item task-item ${task.done ? 'completed' : ''}" data-index="${index}">
-                    <span class="task-text">${escapeHtml(task.text)}</span>
+            list.innerHTML = tasks.map((task, i) => `
+                <li class="item ${task.done ? 'done' : ''}" data-index="${i}">
+                    <span class="item-text">${escapeHtml(task.text)}</span>
                     <div class="item-actions">
-                        ${!task.done ? `<button class="action-btn done-btn" data-index="${index}">✅</button>` : ''}
-                        <button class="action-btn delete-btn" data-index="${index}">🗑️</button>
+                        ${!task.done ? `<button class="item-btn done-btn" data-index="${i}">✅</button>` : ''}
+                        <button class="item-btn delete-btn" data-index="${i}">🗑️</button>
                     </div>
                 </li>
             `).join('');
-            document.getElementById('taskCount').textContent = tasks.length;
+            const count = tasks.length;
+            document.getElementById('taskCount').textContent = count;
+            document.getElementById('taskBadge').textContent = count;
+            document.getElementById('taskBadge').classList.remove('hidden');
             updateWeekTasks();
         }
 
         function renderNotes(notes) {
             const list = document.getElementById('notesList');
             if (!notes || notes.length === 0) {
-                list.innerHTML = '<li class="empty-message">Нет заметок. Добавьте первую!</li>';
+                list.innerHTML = '<li class="empty">Нет заметок. Добавьте первую!</li>';
+                document.getElementById('noteCount').textContent = '0';
+                document.getElementById('noteBadge').textContent = '0';
                 return;
             }
-            list.innerHTML = notes.map((note, index) => `
-                <li class="list-item note-item" data-index="${index}">
-                    <span class="note-text">${escapeHtml(note.text)}</span>
-                    ${note.date ? `<span class="note-date">📅 ${escapeHtml(note.date)}</span>` : ''}
-                    <button class="action-btn delete-btn" data-index="${index}">🗑️</button>
+            list.innerHTML = notes.map((note, i) => `
+                <li class="item" data-index="${i}">
+                    <span class="item-text">${escapeHtml(note.text)}</span>
+                    <div class="item-actions">
+                        ${note.date ? `<span style="font-size:11px;color:#8e9aaf;margin-right:6px;">📅 ${escapeHtml(note.date)}</span>` : ''}
+                        <button class="item-btn delete-btn" data-index="${i}">🗑️</button>
+                    </div>
                 </li>
             `).join('');
-            document.getElementById('noteCount').textContent = notes.length;
+            const count = notes.length;
+            document.getElementById('noteCount').textContent = count;
+            document.getElementById('noteBadge').textContent = count;
+            document.getElementById('noteBadge').classList.remove('hidden');
         }
 
         function updateWeekTasks() {
@@ -595,12 +605,20 @@
             const now = new Date();
             const startOfWeek = new Date(now);
             startOfWeek.setDate(now.getDate() - now.getDay() + 1);
+            startOfWeek.setHours(0, 0, 0, 0);
             const endOfWeek = new Date(startOfWeek);
             endOfWeek.setDate(startOfWeek.getDate() + 6);
+            endOfWeek.setHours(23, 59, 59, 999);
 
-            const weekTasks = tasks.filter(task => {
-                if (task.done) return false;
-                return task.text && task.text.includes('сегодня') || task.text.includes('завтра');
+            const weekTasks = tasks.filter(t => {
+                if (t.done) return false;
+                const match = t.text.match(/(\d{2}\.\d{2}\.\d{4})/);
+                if (match) {
+                    const parts = match[1].split('.');
+                    const date = new Date(parts[2], parts[1] - 1, parts[0]);
+                    return date >= startOfWeek && date <= endOfWeek;
+                }
+                return false;
             });
             document.getElementById('weekTasks').textContent = weekTasks.length;
         }
@@ -608,12 +626,6 @@
         async function refreshData() {
             const data = await fetchUserData();
             currentData = data;
-            if (data.name) {
-                userName = data.name;
-                localStorage.setItem('tasky_user_name', userName);
-            }
-            document.getElementById('userName').textContent = userName;
-            document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
             renderTasks(data.tasks || []);
             renderNotes(data.notes || []);
             renderCalendar();
@@ -643,16 +655,16 @@
         });
 
         document.getElementById('tasksList').addEventListener('click', async (e) => {
-            const target = e.target.closest('button');
-            if (!target) return;
-            const index = parseInt(target.dataset.index);
+            const btn = e.target.closest('.item-btn');
+            if (!btn) return;
+            const index = parseInt(btn.dataset.index);
             if (isNaN(index)) return;
             const tasks = [...(currentData.tasks || [])];
-            if (target.classList.contains('delete-btn')) {
+            if (btn.classList.contains('delete-btn')) {
                 tasks.splice(index, 1);
                 await saveUserData({ ...currentData, tasks });
                 await refreshData();
-            } else if (target.classList.contains('done-btn')) {
+            } else if (btn.classList.contains('done-btn')) {
                 tasks[index].done = true;
                 await saveUserData({ ...currentData, tasks });
                 await refreshData();
@@ -660,11 +672,11 @@
         });
 
         document.getElementById('notesList').addEventListener('click', async (e) => {
-            const target = e.target.closest('button');
-            if (!target) return;
-            const index = parseInt(target.dataset.index);
+            const btn = e.target.closest('.item-btn');
+            if (!btn) return;
+            const index = parseInt(btn.dataset.index);
             if (isNaN(index)) return;
-            if (target.classList.contains('delete-btn')) {
+            if (btn.classList.contains('delete-btn')) {
                 const notes = [...(currentData.notes || [])];
                 notes.splice(index, 1);
                 await saveUserData({ ...currentData, notes });
@@ -682,7 +694,7 @@
             const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
-            document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
+            document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
 
             const firstDay = new Date(year, month, 1);
             const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
@@ -695,10 +707,19 @@
                 const dateObj = new Date(year, month, day);
                 const isToday = today.toDateString() === dateObj.toDateString();
                 const isSelected = selectedDate.toDateString() === dateObj.toDateString();
-                const hasEvents = (currentData.tasks || []).some(task => task.text && task.text.includes(dateObj.toLocaleDateString()));
-                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasEvents ? 'has-events' : ''}" data-date="${dateObj.toISOString()}">${day}</div>`;
+                const hasEvent = (currentData.tasks || []).some(t => {
+                    if (t.done) return false;
+                    const match = t.text.match(/(\d{2}\.\d{2}\.\d{4})/);
+                    if (match) {
+                        const parts = match[1].split('.');
+                        const d = new Date(parts[2], parts[1] - 1, parts[0]);
+                        return d.toDateString() === dateObj.toDateString();
+                    }
+                    return false;
+                });
+                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasEvent ? 'has-event' : ''}" data-date="${dateObj.toISOString()}">${day}</div>`;
             }
-            document.getElementById('calendar-days').innerHTML = html;
+            document.getElementById('calendarDays').innerHTML = html;
 
             document.querySelectorAll('.calendar-day:not(.empty)').forEach(el => {
                 el.addEventListener('click', function() {
@@ -711,23 +732,29 @@
         }
 
         function renderEventsForDate(date) {
-            const list = document.getElementById('calendar-events-list');
-            const tasks = (currentData.tasks || []).filter(task => {
-                if (task.done) return false;
-                return task.text && task.text.includes(date.toLocaleDateString());
+            const list = document.getElementById('calendarEventsList');
+            const tasks = (currentData.tasks || []).filter(t => {
+                if (t.done) return false;
+                const match = t.text.match(/(\d{2}\.\d{2}\.\d{4})/);
+                if (match) {
+                    const parts = match[1].split('.');
+                    const d = new Date(parts[2], parts[1] - 1, parts[0]);
+                    return d.toDateString() === date.toDateString();
+                }
+                return false;
             });
             if (tasks.length === 0) {
-                list.innerHTML = '<li class="empty-message">Нет событий на этот день</li>';
+                list.innerHTML = '<li class="empty">Нет событий на этот день</li>';
             } else {
-                list.innerHTML = tasks.map(task => `<li>${escapeHtml(task.text)}</li>`).join('');
+                list.innerHTML = tasks.map(t => `<li class="calendar-event">${escapeHtml(t.text)}</li>`).join('');
             }
         }
 
-        document.getElementById('calendar-prev').addEventListener('click', () => {
+        document.getElementById('calendarPrev').addEventListener('click', () => {
             currentDate.setMonth(currentDate.getMonth() - 1);
             renderCalendar();
         });
-        document.getElementById('calendar-next').addEventListener('click', () => {
+        document.getElementById('calendarNext').addEventListener('click', () => {
             currentDate.setMonth(currentDate.getMonth() + 1);
             renderCalendar();
         });
@@ -746,32 +773,16 @@
         });
 
         // ============================================================
-        // 7. ВЫХОД
+        // 7. ЗАПУСК
         // ============================================================
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm('Вы уверены?')) {
-                localStorage.removeItem('tasky_user_id');
-                localStorage.removeItem('tasky_user_name');
-                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-                localStorage.setItem('tasky_user_id', userId);
-                userName = 'Пользователь';
-                localStorage.setItem('tasky_user_name', userName);
-                refreshData();
-            }
-        });
-
-        // ============================================================
-        // 8. ЗАПУСК
-        // ============================================================
-        document.getElementById('userName').textContent = userName;
-        document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
         refreshData();
 
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) refreshData();
         });
 
-        console.log(`✅ Tasky запущен: ${SITE_URL}`);
+        console.log('✅ Tasky запущен');
     </script>
+
 </body>
 </html>
