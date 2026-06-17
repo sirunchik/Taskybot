@@ -2,134 +2,536 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>📱 Tasky Органайзер</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f7fa;
+            color: #1e293b;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        /* ===== ПРОФИЛЬ ===== */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .user-email {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #f1f5f9;
+        }
+
+        /* ===== СТАТИСТИКА ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .stat-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        /* ===== ВКЛАДКИ ===== */
+        .tabs-header {
+            display: flex;
+            gap: 4px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 0;
+            border: none;
+            background: transparent;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #0f172a;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .tab-btn:hover {
+            color: #0f172a;
+        }
+
+        /* ===== КОНТЕНТ ВКЛАДОК ===== */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== ФОРМА ДОБАВЛЕНИЯ ===== */
+        .add-item-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .add-item-form input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .add-item-form input:focus {
+            border-color: #6c5ce7;
+        }
+
+        .add-btn {
+            padding: 12px 18px;
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .add-btn:hover {
+            background: #5a4bd1;
+        }
+
+        /* ===== СПИСОК ЗАДАЧ ===== */
+        .items-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .list-item:hover {
+            background: #f1f5f9;
+        }
+
+        .list-item.completed .task-text {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+
+        .task-text, .note-text {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .note-date {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-right: 12px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #94a3b8;
+            padding: 24px 0;
+            font-size: 14px;
+        }
+
+        /* ===== КАЛЕНДАРЬ ===== */
+        #calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        #calendar-header button {
+            background: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #calendar-header button:hover {
+            background: #f1f5f9;
+        }
+
+        #calendar-month-year {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        #calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+        }
+
+        .calendar-day:hover {
+            background: #f1f5f9;
+        }
+
+        .calendar-day.today {
+            background: #6c5ce7;
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.today:hover {
+            background: #5a4bd1;
+        }
+
+        .calendar-day.selected {
+            border: 2px solid #6c5ce7;
+        }
+
+        .calendar-day.has-events::after {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 6px;
+            background: #6c5ce7;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+        }
+
+        .calendar-day.empty {
+            cursor: default;
+            background: transparent !important;
+        }
+
+        .calendar-day {
+            position: relative;
+        }
+
+        #calendar-events {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        #calendar-events h3 {
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        #calendar-events-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #calendar-events-list li {
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        /* ===== ФУТЕР ===== */
+        .app-footer {
+            text-align: center;
+            margin-top: 28px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .app-footer a {
+            color: #6c5ce7;
+            text-decoration: none;
+        }
+
+        .app-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 400px) {
+            .app-container {
+                padding: 16px;
+                border-radius: 20px;
+            }
+
+            .stats-grid {
+                gap: 8px;
+            }
+
+            .stat-item {
+                padding: 10px;
+            }
+
+            .stat-number {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="app-container" id="app">
-        <header class="app-header">
-            <div class="header-content">
-                <h1>📱 Tasky Органайзер</h1>
-                <a href="https://taskybot-zzq3.onrender.com" target="_blank" class="web-link">🌐 Открыть в браузере</a>
+        <!-- ПРОФИЛЬ -->
+        <section class="profile-section">
+            <div class="profile-info">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <div>
+                    <div class="user-name" id="userName">Пользователь</div>
+                    <div class="user-email" id="userEmail">@user</div>
+                </div>
             </div>
-        </header>
+            <button id="logoutBtn" class="logout-btn">🚪 Выйти</button>
+        </section>
 
-        <main>
-            <section class="profile-section" id="profileSection">
-                <div class="profile-card">
-                    <div class="profile-info">
-                        <span class="user-avatar" id="userAvatar">👤</span>
-                        <span class="user-name" id="userName">Пользователь</span>
-                    </div>
-                    <button id="logoutBtn" class="logout-btn">🚪 Выйти</button>
-                </div>
-                <div class="stats-grid" id="statsGrid">
-                    <div class="stat-item">
-                        <span class="stat-number" id="taskCount">0</span>
-                        <span class="stat-label">Задач</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="noteCount">0</span>
-                        <span class="stat-label">Заметок</span>
-                    </div>
-                </div>
-            </section>
+        <!-- СТАТИСТИКА -->
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number" id="taskCount">0</span>
+                <span class="stat-label">📋 Задач</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="noteCount">0</span>
+                <span class="stat-label">📝 Заметок</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="weekTasks">0</span>
+                <span class="stat-label">📅 На неделю</span>
+            </div>
+        </div>
 
-            <section class="tabs-section">
-                <div class="tabs-header">
-                    <button class="tab-btn active" data-tab="tasks">📋 Задачи</button>
-                    <button class="tab-btn" data-tab="notes">📝 Заметки</button>
-                    <button class="tab-btn" data-tab="calendar">📅 Календарь</button>
-                </div>
+        <!-- ВКЛАДКИ -->
+        <div class="tabs-header">
+            <button class="tab-btn active" data-tab="tasks">📋 Задачи</button>
+            <button class="tab-btn" data-tab="notes">📝 Заметки</button>
+            <button class="tab-btn" data-tab="calendar">📅 Календарь</button>
+        </div>
 
-                <div class="tab-content active" id="tab-tasks">
-                    <div class="add-item-form">
-                        <input type="text" id="taskInput" placeholder="➕ Новая задача..." />
-                        <button id="addTaskBtn" class="add-btn">➕</button>
-                    </div>
-                    <ul class="items-list" id="tasksList">
-                        <li class="empty-message">Загрузка...</li>
-                    </ul>
-                </div>
+        <!-- ВКЛАДКА: ЗАДАЧИ -->
+        <div class="tab-content active" id="tab-tasks">
+            <div class="add-item-form">
+                <input type="text" id="taskInput" placeholder="➕ Новая задача..." />
+                <button id="addTaskBtn" class="add-btn">➕</button>
+            </div>
+            <ul class="items-list" id="tasksList">
+                <li class="empty-message">Нет задач. Добавьте первую!</li>
+            </ul>
+        </div>
 
-                <div class="tab-content" id="tab-notes">
-                    <div class="add-item-form">
-                        <input type="text" id="noteInput" placeholder="✏️ Новая заметка..." />
-                        <button id="addNoteBtn" class="add-btn">➕</button>
-                    </div>
-                    <ul class="items-list" id="notesList">
-                        <li class="empty-message">Загрузка...</li>
-                    </ul>
-                </div>
+        <!-- ВКЛАДКА: ЗАМЕТКИ -->
+        <div class="tab-content" id="tab-notes">
+            <div class="add-item-form">
+                <input type="text" id="noteInput" placeholder="✏️ Новая заметка..." />
+                <button id="addNoteBtn" class="add-btn">➕</button>
+            </div>
+            <ul class="items-list" id="notesList">
+                <li class="empty-message">Нет заметок. Добавьте первую!</li>
+            </ul>
+        </div>
 
-                <div class="tab-content" id="tab-calendar">
-                    <div id="calendar-container">
-                        <!-- Здесь будет календарь -->
-                        <div id="calendar-header">
-                            <button id="calendar-prev">◀</button>
-                            <span id="calendar-month-year">Январь 2026</span>
-                            <button id="calendar-next">▶</button>
-                        </div>
-                        <div id="calendar-grid">
-                            <div class="calendar-weekdays">
-                                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
-                            </div>
-                            <div id="calendar-days"></div>
-                        </div>
-                        <div id="calendar-events">
-                            <h3>События на выбранную дату</h3>
-                            <ul id="calendar-events-list">
-                                <li class="empty-message">Нет событий</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
+        <!-- ВКЛАДКА: КАЛЕНДАРЬ -->
+        <div class="tab-content" id="tab-calendar">
+            <div id="calendar-header">
+                <button id="calendar-prev">◀</button>
+                <span id="calendar-month-year">Январь 2026</span>
+                <button id="calendar-next">▶</button>
+            </div>
+            <div class="calendar-weekdays">
+                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+            </div>
+            <div id="calendar-days"></div>
+            <div id="calendar-events">
+                <h3>📌 События на этот день</h3>
+                <ul id="calendar-events-list">
+                    <li class="empty-message">Нет событий</li>
+                </ul>
+            </div>
+        </div>
 
+        <!-- ФУТЕР -->
         <footer class="app-footer">
-            <p>© 2026 TaskyBot · Твой помощник в делах</p>
-            <p class="footer-bot-link">🤖 <a href="https://t.me/ваш_бот_username" target="_blank">Telegram-бот</a></p>
+            <p>© 2026 TaskyBot · <a href="https://taskybot-zzq3.onrender.com" target="_blank">Открыть в браузере</a></p>
         </footer>
     </div>
 
-    <script src="script.js"></script>
     <script>
         // ============================================================
-        // 1. Инициализация и авторизация пользователя
+        // 1. ИНИЦИАЛИЗАЦИЯ
         // ============================================================
-        
-        // Конфиг
         const API_URL = '/api/user';
-        const SITE_URL = 'https://taskybot-zzq3.onrender.com'; // ОБНОВЛЕННАЯ ССЫЛКА
-        
-        // Получаем или создаём ID пользователя
+        const SITE_URL = 'https://taskybot-zzq3.onrender.com';
+
         let userId = localStorage.getItem('tasky_user_id');
         if (!userId) {
             userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
             localStorage.setItem('tasky_user_id', userId);
         }
-        
-        // Имя пользователя (можно потом изменить)
+
         let userName = localStorage.getItem('tasky_user_name') || 'Пользователь';
-        
+        let currentData = { name: userName, tasks: [], notes: [] };
+
         // ============================================================
-        // 2. Основные функции работы с API
+        // 2. API
         // ============================================================
-        
         async function fetchUserData() {
             try {
                 const response = await fetch(`${API_URL}/${userId}`);
-                if (!response.ok) throw new Error('Ошибка загрузки данных');
+                if (!response.ok) throw new Error('Ошибка загрузки');
                 return await response.json();
             } catch (error) {
-                console.error('Ошибка:', error);
                 return { name: userName, tasks: [], notes: [] };
             }
         }
-        
+
         async function saveUserData(data) {
             try {
                 const response = await fetch(`${API_URL}/${userId}`, {
@@ -140,37 +542,26 @@
                 if (!response.ok) throw new Error('Ошибка сохранения');
                 return await response.json();
             } catch (error) {
-                console.error('Ошибка:', error);
                 alert('Не удалось сохранить данные. Проверьте соединение.');
             }
         }
-        
+
         // ============================================================
-        // 3. Рендеринг UI
+        // 3. РЕНДЕРИНГ
         // ============================================================
-        
-        // Элементы DOM
-        const tasksList = document.getElementById('tasksList');
-        const notesList = document.getElementById('notesList');
-        const taskInput = document.getElementById('taskInput');
-        const noteInput = document.getElementById('noteInput');
-        const addTaskBtn = document.getElementById('addTaskBtn');
-        const addNoteBtn = document.getElementById('addNoteBtn');
-        const taskCount = document.getElementById('taskCount');
-        const noteCount = document.getElementById('noteCount');
-        const userNameElem = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        
-        // Состояние
-        let currentData = { name: userName, tasks: [], notes: [] };
-        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function renderTasks(tasks) {
+            const list = document.getElementById('tasksList');
             if (!tasks || tasks.length === 0) {
-                tasksList.innerHTML = '<li class="empty-message">📭 Нет задач. Добавьте первую!</li>';
+                list.innerHTML = '<li class="empty-message">Нет задач. Добавьте первую!</li>';
                 return;
             }
-            
-            tasksList.innerHTML = tasks.map((task, index) => `
+            list.innerHTML = tasks.map((task, index) => `
                 <li class="list-item task-item ${task.done ? 'completed' : ''}" data-index="${index}">
                     <span class="task-text">${escapeHtml(task.text)}</span>
                     <div class="item-actions">
@@ -179,102 +570,84 @@
                     </div>
                 </li>
             `).join('');
-            
-            // Обновляем счетчик
-            taskCount.textContent = tasks.length;
+            document.getElementById('taskCount').textContent = tasks.length;
+            updateWeekTasks();
         }
-        
+
         function renderNotes(notes) {
+            const list = document.getElementById('notesList');
             if (!notes || notes.length === 0) {
-                notesList.innerHTML = '<li class="empty-message">📭 Нет заметок. Добавьте первую!</li>';
+                list.innerHTML = '<li class="empty-message">Нет заметок. Добавьте первую!</li>';
                 return;
             }
-            
-            notesList.innerHTML = notes.map((note, index) => `
+            list.innerHTML = notes.map((note, index) => `
                 <li class="list-item note-item" data-index="${index}">
                     <span class="note-text">${escapeHtml(note.text)}</span>
                     ${note.date ? `<span class="note-date">📅 ${escapeHtml(note.date)}</span>` : ''}
                     <button class="action-btn delete-btn" data-index="${index}">🗑️</button>
                 </li>
             `).join('');
-            
-            // Обновляем счетчик
-            noteCount.textContent = notes.length;
+            document.getElementById('noteCount').textContent = notes.length;
         }
-        
-        // Вспомогательная функция для защиты от XSS
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+
+        function updateWeekTasks() {
+            const tasks = currentData.tasks || [];
+            const now = new Date();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay() + 1);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+            const weekTasks = tasks.filter(task => {
+                if (task.done) return false;
+                return task.text && task.text.includes('сегодня') || task.text.includes('завтра');
+            });
+            document.getElementById('weekTasks').textContent = weekTasks.length;
         }
-        
-        // ============================================================
-        // 4. Обновление данных и UI
-        // ============================================================
-        
+
         async function refreshData() {
             const data = await fetchUserData();
             currentData = data;
-            
-            // Обновляем имя
             if (data.name) {
                 userName = data.name;
-                userNameElem.textContent = userName;
                 localStorage.setItem('tasky_user_name', userName);
             }
-            
-            // Обновляем задачи и заметки
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
             renderTasks(data.tasks || []);
             renderNotes(data.notes || []);
+            renderCalendar();
         }
-        
+
         // ============================================================
-        // 5. Обработчики событий (добавление, удаление, выполнение)
+        // 4. ДОБАВЛЕНИЕ / УДАЛЕНИЕ
         // ============================================================
-        
-        // --- Добавление задачи ---
-        addTaskBtn.addEventListener('click', async () => {
-            const text = taskInput.value.trim();
+        document.getElementById('addTaskBtn').addEventListener('click', async () => {
+            const input = document.getElementById('taskInput');
+            const text = input.value.trim();
             if (!text) return;
-            
-            const newTask = { text, done: false };
-            const tasks = [...(currentData.tasks || []), newTask];
+            const tasks = [...(currentData.tasks || []), { text, done: false }];
             await saveUserData({ ...currentData, tasks });
-            taskInput.value = '';
+            input.value = '';
             await refreshData();
         });
-        
-        taskInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addTaskBtn.click();
-        });
-        
-        // --- Добавление заметки ---
-        addNoteBtn.addEventListener('click', async () => {
-            const text = noteInput.value.trim();
+
+        document.getElementById('addNoteBtn').addEventListener('click', async () => {
+            const input = document.getElementById('noteInput');
+            const text = input.value.trim();
             if (!text) return;
-            
-            const newNote = { text, date: new Date().toLocaleString() };
-            const notes = [...(currentData.notes || []), newNote];
+            const notes = [...(currentData.notes || []), { text, date: new Date().toLocaleString() }];
             await saveUserData({ ...currentData, notes });
-            noteInput.value = '';
+            input.value = '';
             await refreshData();
         });
-        
-        noteInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addNoteBtn.click();
-        });
-        
-        // --- Удаление и выполнение (через делегирование) ---
-        tasksList.addEventListener('click', async (e) => {
+
+        document.getElementById('tasksList').addEventListener('click', async (e) => {
             const target = e.target.closest('button');
             if (!target) return;
-            
             const index = parseInt(target.dataset.index);
             if (isNaN(index)) return;
-            
             const tasks = [...(currentData.tasks || [])];
-            
             if (target.classList.contains('delete-btn')) {
                 tasks.splice(index, 1);
                 await saveUserData({ ...currentData, tasks });
@@ -285,14 +658,12 @@
                 await refreshData();
             }
         });
-        
-        notesList.addEventListener('click', async (e) => {
+
+        document.getElementById('notesList').addEventListener('click', async (e) => {
             const target = e.target.closest('button');
             if (!target) return;
-            
             const index = parseInt(target.dataset.index);
             if (isNaN(index)) return;
-            
             if (target.classList.contains('delete-btn')) {
                 const notes = [...(currentData.notes || [])];
                 notes.splice(index, 1);
@@ -300,124 +671,85 @@
                 await refreshData();
             }
         });
-        
+
         // ============================================================
-        // 6. Календарь
+        // 5. КАЛЕНДАРЬ
         // ============================================================
-        
         let currentDate = new Date();
         let selectedDate = new Date();
-        
+
         function renderCalendar() {
-            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
-                               'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
-            
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
-            
             document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
-            
+
             const firstDay = new Date(year, month, 1);
-            const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Понедельник = 0
-            
+            const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            let html = '';
-            
-            // Пустые дни перед началом месяца
-            for (let i = 0; i < startDay; i++) {
-                html += '<div class="calendar-day empty"></div>';
-            }
-            
-            // Дни месяца
             const today = new Date();
+
+            let html = '';
+            for (let i = 0; i < startDay; i++) html += '<div class="calendar-day empty"></div>';
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateObj = new Date(year, month, day);
-                const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
-                const isSelected = selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === day;
-                
-                // Проверяем, есть ли события на этот день
-                const hasEvents = checkEventsForDate(dateObj);
-                
-                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasEvents ? 'has-events' : ''}" data-date="${year}-${month+1}-${day}">${day}</div>`;
+                const isToday = today.toDateString() === dateObj.toDateString();
+                const isSelected = selectedDate.toDateString() === dateObj.toDateString();
+                const hasEvents = (currentData.tasks || []).some(task => task.text && task.text.includes(dateObj.toLocaleDateString()));
+                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasEvents ? 'has-events' : ''}" data-date="${dateObj.toISOString()}">${day}</div>`;
             }
-            
             document.getElementById('calendar-days').innerHTML = html;
-            
-            // Добавляем обработчики кликов на дни
+
             document.querySelectorAll('.calendar-day:not(.empty)').forEach(el => {
                 el.addEventListener('click', function() {
-                    const dateParts = this.dataset.date.split('-');
-                    selectedDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1])-1, parseInt(dateParts[2]));
+                    selectedDate = new Date(this.dataset.date);
                     renderCalendar();
                     renderEventsForDate(selectedDate);
                 });
             });
-            
-            // Показываем события для выбранной даты
             renderEventsForDate(selectedDate);
         }
-        
-        function checkEventsForDate(date) {
-            const tasks = currentData.tasks || [];
-            // Ищем задачи, которые содержат дату в тексте (можно улучшить)
-            return tasks.some(task => task.text.includes(date.toLocaleDateString()));
-        }
-        
+
         function renderEventsForDate(date) {
-            const eventsList = document.getElementById('calendar-events-list');
-            const tasks = currentData.tasks || [];
-            
-            // Фильтруем задачи, которые содержат дату в тексте (упрощенный вариант)
-            const dateStr = date.toLocaleDateString();
-            const events = tasks.filter(task => task.text.includes(dateStr) && !task.done);
-            
-            if (events.length === 0) {
-                eventsList.innerHTML = '<li class="empty-message">Нет событий на этот день</li>';
+            const list = document.getElementById('calendar-events-list');
+            const tasks = (currentData.tasks || []).filter(task => {
+                if (task.done) return false;
+                return task.text && task.text.includes(date.toLocaleDateString());
+            });
+            if (tasks.length === 0) {
+                list.innerHTML = '<li class="empty-message">Нет событий на этот день</li>';
             } else {
-                eventsList.innerHTML = events.map(event => `
-                    <li>${escapeHtml(event.text)}</li>
-                `).join('');
+                list.innerHTML = tasks.map(task => `<li>${escapeHtml(task.text)}</li>`).join('');
             }
         }
-        
-        // Навигация по календарю
+
         document.getElementById('calendar-prev').addEventListener('click', () => {
             currentDate.setMonth(currentDate.getMonth() - 1);
             renderCalendar();
         });
-        
         document.getElementById('calendar-next').addEventListener('click', () => {
             currentDate.setMonth(currentDate.getMonth() + 1);
             renderCalendar();
         });
-        
+
         // ============================================================
-        // 7. Переключение вкладок
+        // 6. ВКЛАДКИ
         // ============================================================
-        
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
                 this.classList.add('active');
-                const tabId = this.dataset.tab;
-                document.getElementById(`tab-${tabId}`).classList.add('active');
-                
-                // Обновляем календарь при переключении на него
-                if (tabId === 'calendar') {
-                    renderCalendar();
-                }
+                document.getElementById(`tab-${this.dataset.tab}`).classList.add('active');
+                if (this.dataset.tab === 'calendar') renderCalendar();
             });
         });
-        
+
         // ============================================================
-        // 8. Выход (сброс ID)
+        // 7. ВЫХОД
         // ============================================================
-        
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm('Вы уверены, что хотите выйти? Данные останутся на сервере.')) {
+            if (confirm('Вы уверены?')) {
                 localStorage.removeItem('tasky_user_id');
                 localStorage.removeItem('tasky_user_name');
                 userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
@@ -427,24 +759,19 @@
                 refreshData();
             }
         });
-        
+
         // ============================================================
-        // 9. Запуск приложения
+        // 8. ЗАПУСК
         // ============================================================
-        
-        userNameElem.textContent = userName;
-        userAvatar.textContent = userName.charAt(0).toUpperCase();
-        
+        document.getElementById('userName').textContent = userName;
+        document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
         refreshData();
-        
+
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                refreshData();
-            }
+            if (!document.hidden) refreshData();
         });
-        
-        console.log(`✅ Tasky Органайзер запущен. URL: ${SITE_URL}`);
-        console.log(`👤 ID пользователя: ${userId}`);
+
+        console.log(`✅ Tasky запущен: ${SITE_URL}`);
     </script>
 </body>
 </html>
