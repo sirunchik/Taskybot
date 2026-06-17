@@ -2,6 +2,7 @@ from flask import Flask, send_from_directory, request, jsonify
 from flask_cors import CORS
 import json
 import os
+import threading
 
 app = Flask(__name__, static_folder='web_app')
 CORS(app)
@@ -81,6 +82,26 @@ def save_user_data(user_id):
     save_users(users)
     return jsonify({'status': 'ok'})
 
+# ========== ЗАПУСК БОТА В ФОНОВОМ ПОТОКЕ ==========
+def run_bot():
+    """Запускает бота из main.py в отдельном потоке"""
+    try:
+        import main
+        # Если в main.py есть функция main() - вызываем её
+        if hasattr(main, 'main'):
+            main.main()
+        else:
+            # Если нет - просто импорт уже выполнил код
+            print("✅ Бот запущен (код выполнен при импорте)")
+    except Exception as e:
+        print(f"❌ Ошибка при запуске бота: {e}")
+
+# Запускаем бота в фоновом потоке
+bot_thread = threading.Thread(target=run_bot, daemon=True)
+bot_thread.start()
+print("🚀 Бот запущен в фоновом потоке")
+
+# ========== ЗАПУСК ВЕБ-СЕРВЕРА ==========
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"🚀 Веб-сервер запущен на порту {port}")
