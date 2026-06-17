@@ -41,6 +41,7 @@
                 <div class="tabs-header">
                     <button class="tab-btn active" data-tab="tasks">📋 Задачи</button>
                     <button class="tab-btn" data-tab="notes">📝 Заметки</button>
+                    <button class="tab-btn" data-tab="calendar">📅 Календарь</button>
                 </div>
 
                 <div class="tab-content active" id="tab-tasks">
@@ -61,6 +62,29 @@
                     <ul class="items-list" id="notesList">
                         <li class="empty-message">Загрузка...</li>
                     </ul>
+                </div>
+
+                <div class="tab-content" id="tab-calendar">
+                    <div id="calendar-container">
+                        <!-- Здесь будет календарь -->
+                        <div id="calendar-header">
+                            <button id="calendar-prev">◀</button>
+                            <span id="calendar-month-year">Январь 2026</span>
+                            <button id="calendar-next">▶</button>
+                        </div>
+                        <div id="calendar-grid">
+                            <div class="calendar-weekdays">
+                                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+                            </div>
+                            <div id="calendar-days"></div>
+                        </div>
+                        <div id="calendar-events">
+                            <h3>События на выбранную дату</h3>
+                            <ul id="calendar-events-list">
+                                <li class="empty-message">Нет событий</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
@@ -278,24 +302,118 @@
         });
         
         // ============================================================
-        // 6. Переключение вкладок
+        // 6. Календарь
+        // ============================================================
+        
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        
+        function renderCalendar() {
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                               'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
+            
+            const firstDay = new Date(year, month, 1);
+            const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Понедельник = 0
+            
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            let html = '';
+            
+            // Пустые дни перед началом месяца
+            for (let i = 0; i < startDay; i++) {
+                html += '<div class="calendar-day empty"></div>';
+            }
+            
+            // Дни месяца
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateObj = new Date(year, month, day);
+                const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+                const isSelected = selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === day;
+                
+                // Проверяем, есть ли события на этот день
+                const hasEvents = checkEventsForDate(dateObj);
+                
+                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasEvents ? 'has-events' : ''}" data-date="${year}-${month+1}-${day}">${day}</div>`;
+            }
+            
+            document.getElementById('calendar-days').innerHTML = html;
+            
+            // Добавляем обработчики кликов на дни
+            document.querySelectorAll('.calendar-day:not(.empty)').forEach(el => {
+                el.addEventListener('click', function() {
+                    const dateParts = this.dataset.date.split('-');
+                    selectedDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1])-1, parseInt(dateParts[2]));
+                    renderCalendar();
+                    renderEventsForDate(selectedDate);
+                });
+            });
+            
+            // Показываем события для выбранной даты
+            renderEventsForDate(selectedDate);
+        }
+        
+        function checkEventsForDate(date) {
+            const tasks = currentData.tasks || [];
+            // Ищем задачи, которые содержат дату в тексте (можно улучшить)
+            return tasks.some(task => task.text.includes(date.toLocaleDateString()));
+        }
+        
+        function renderEventsForDate(date) {
+            const eventsList = document.getElementById('calendar-events-list');
+            const tasks = currentData.tasks || [];
+            
+            // Фильтруем задачи, которые содержат дату в тексте (упрощенный вариант)
+            const dateStr = date.toLocaleDateString();
+            const events = tasks.filter(task => task.text.includes(dateStr) && !task.done);
+            
+            if (events.length === 0) {
+                eventsList.innerHTML = '<li class="empty-message">Нет событий на этот день</li>';
+            } else {
+                eventsList.innerHTML = events.map(event => `
+                    <li>${escapeHtml(event.text)}</li>
+                `).join('');
+            }
+        }
+        
+        // Навигация по календарю
+        document.getElementById('calendar-prev').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+        
+        document.getElementById('calendar-next').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+        
+        // ============================================================
+        // 7. Переключение вкладок
         // ============================================================
         
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                // Убираем активный класс у всех кнопок и вкладок
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 
-                // Активируем текущие
                 this.classList.add('active');
                 const tabId = this.dataset.tab;
                 document.getElementById(`tab-${tabId}`).classList.add('active');
+                
+                // Обновляем календарь при переключении на него
+                if (tabId === 'calendar') {
+                    renderCalendar();
+                }
             });
         });
         
         // ============================================================
-        // 7. Выход (сброс ID)
+        // 8. Выход (сброс ID)
         // ============================================================
         
         document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -311,17 +429,14 @@
         });
         
         // ============================================================
-        // 8. Запуск приложения
+        // 9. Запуск приложения
         // ============================================================
         
-        // Устанавливаем имя в UI
         userNameElem.textContent = userName;
         userAvatar.textContent = userName.charAt(0).toUpperCase();
         
-        // Загружаем данные
         refreshData();
         
-        // Обновление данных при возвращении на вкладку (для синхронизации)
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 refreshData();
