@@ -3,6 +3,8 @@ from flask_cors import CORS
 import json
 import os
 import threading
+import sys
+import time
 
 app = Flask(__name__, static_folder='web_app')
 CORS(app)
@@ -84,22 +86,46 @@ def save_user_data(user_id):
 
 # ========== ЗАПУСК БОТА В ФОНОВОМ ПОТОКЕ ==========
 def run_bot():
-    """Запускает бота из main.py в отдельном потоке"""
+    """Запускает бота из main.py в отдельном потоке с диагностикой"""
     try:
+        print("🔍 Пытаемся импортировать main.py...")
         import main
-        # Если в main.py есть функция main() - вызываем её
+        print("✅ main.py успешно импортирован")
+        
+        # Проверяем наличие токена
+        token = os.getenv('TOKEN')
+        if token:
+            print(f"✅ Токен найден (длина: {len(token)} символов)")
+        else:
+            print("❌ ТОКЕН НЕ НАЙДЕН! Бот не запустится.")
+            return
+        
+        # Запускаем бота
         if hasattr(main, 'main'):
+            print("🚀 Запускаем функцию main() из main.py")
             main.main()
         else:
-            # Если нет - просто импорт уже выполнил код
-            print("✅ Бот запущен (код выполнен при импорте)")
+            print("⚠️ Функция main() не найдена, но файл импортирован.")
+            print("ℹ️ Если в main.py код выполняется сразу, бот уже запущен.")
+            # Если код в main.py выполняется сразу, он уже запустился при импорте.
+            # Но чтобы он не завершился, держим поток живым
+            while True:
+                time.sleep(60)
+                
     except Exception as e:
-        print(f"❌ Ошибка при запуске бота: {e}")
+        print(f"❌ КРИТИЧЕСКАЯ ОШИБКА при запуске бота: {e}")
+        import traceback
+        traceback.print_exc()
 
 # Запускаем бота в фоновом потоке
+print("🔄 Создаем поток для бота...")
 bot_thread = threading.Thread(target=run_bot, daemon=True)
 bot_thread.start()
-print("🚀 Бот запущен в фоновом потоке")
+print("🚀 Поток бота запущен (daemon=True)")
+
+# Даем боту время на запуск
+time.sleep(2)
+print("✅ Инициализация завершена")
 
 # ========== ЗАПУСК ВЕБ-СЕРВЕРА ==========
 if __name__ == '__main__':
